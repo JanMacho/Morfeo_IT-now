@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "morfeo"
+version = "0.1.0"
+description = "MORFEO, bloque de procesamiento: escaneo del .jar, análisis de logs y modelo de tráfico"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.1",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+morfeo = "morfeo.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --import-mode=importlib"
+markers = [
+    "javac: necesita un JDK (javac, jar, javap) en el PATH",
+    "integration: prueba de extremo a extremo entre módulos",
+]

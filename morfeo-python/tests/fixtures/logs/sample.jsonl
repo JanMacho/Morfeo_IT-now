@@ -1,0 +1,3 @@
+{"timestamp": "2026-09-28T10:00:00.000Z", "session_id": "s1", "method": "GET", "path": "/api/saldo/user_001", "status": 200, "latency_ms": 20, "message": "ok"}
+{"timestamp": "2026-09-28T10:00:03.000Z", "session_id": "s1", "method": "POST", "path": "/api/ingreso", "status": 200, "latency_ms": 100, "message": "ok"}
+{"timestamp": "2026-09-28T10:00:01.000Z", "session_id": "s2", "method": "post", "path": "/api/usuario/crear", "status": 201, "latency_ms": 40, "message": "creado"}

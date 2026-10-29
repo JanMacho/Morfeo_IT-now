@@ -1,0 +1,19 @@
+# Forma anidada: context-path y servlet path
+spring:
+  application:
+    name: shop
+  mvc:
+    servlet:
+      path: /app/
+server:
+  port: 8081
+  servlet:
+    context-path: "/shop"   # comentario al final
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+server:
+  servlet:
+    context-path: /prod

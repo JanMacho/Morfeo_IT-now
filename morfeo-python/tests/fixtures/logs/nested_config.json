@@ -1,0 +1,7 @@
+{
+  "format": "jsonl",
+  "fields": {"timestamp": "ts", "method": "http.method", "path": "http.path", "status": "http.status", "latency_ms": "dur_s", "client_id": "user"},
+  "timestamp_format": "epoch_ms",
+  "latency_unit": "s",
+  "timestamp_is": "end"
+}

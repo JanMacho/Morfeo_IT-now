@@ -1,0 +1,15 @@
+results/*
+!results/.gitkeep
+apps/*
+!apps/.gitkeep
+secrets/
+.morfeo-state.json
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+.ruff_cache/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

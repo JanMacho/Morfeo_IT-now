@@ -1,0 +1,103 @@
+# Laboratorio local: PostgreSQL + bank-api-stress + recolección de logs.
+#
+#   mvn clean package -DskipTests
+#   docker compose up -d --build
+#
+# El log de tráfico queda en ./logs/trafico.json. Además, el sidecar
+# `log-shipper` sube periódicamente una foto de ese log a MinIO
+# (trafico/<hostname>.log), simulando lo que hará cada pod cuando haya varias
+# réplicas en Kubernetes. Para juntar lo subido en un solo fichero:
+#
+#   MINIO_ENDPOINT=http://localhost:9000 MINIO_BUCKET=trafico-logs \
+#   MINIO_ACCESS_KEY=morfeo MINIO_SECRET_KEY=morfeo-secreto \
+#   ./scripts/fetch-aggregated-log.sh
+#
+# Consola de MinIO: http://localhost:9001 (morfeo / morfeo-secreto).
+# Las credenciales son solo para este laboratorio local; no son secretos reales.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: banco
+      POSTGRES_USER: banco
+      POSTGRES_PASSWORD: banco
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U banco -d banco"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/banco
+      DB_USER: banco
+      DB_PASSWORD: banco
+      DB_POOL_SIZE: "10"
+      DB_TIMEOUT_MS: "5000"
+      MAX_THREADS: "200"
+      ACCEPT_COUNT: "100"
+      TRAFFIC_LOG: /logs/trafico.json
+    ports:
+      - "7070:7070"
+    volumes:
+      - ./logs:/logs
+
+  minio:
+    image: minio/minio
+    environment:
+      MINIO_ROOT_USER: morfeo
+      MINIO_ROOT_PASSWORD: morfeo-secreto
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # API S3
+      - "9001:9001"   # consola web
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio-init:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "
+        mc alias set logs http://minio:9000 morfeo morfeo-secreto &&
+        mc mb --ignore-existing logs/trafico-logs
+      "
+
+  log-shipper:
+    image: minio/mc
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+      app:
+        condition: service_started
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: trafico-logs
+      MINIO_ACCESS_KEY: morfeo
+      MINIO_SECRET_KEY: morfeo-secreto
+      TRAFFIC_LOG: /logs/trafico.json
+      LOG_SHIP_KEY: app          # fijo en local (una sola réplica); en k8s, el hostname del pod
+      LOG_SHIP_INTERVAL: "15"
+    entrypoint: ["sh", "/scripts/ship-logs.sh"]
+    volumes:
+      - ./logs:/logs:ro
+      - ./scripts:/scripts:ro
+
+volumes:
+  pgdata:
+  miniodata:

@@ -1,0 +1,23 @@
+# --- backend-java ---
+# Salida de Maven (el jar se genera con "mvn clean package")
+backend-java/target/
+backend-java/dependency-reduced-pom.xml
+# Log de tráfico que escribe la API al ejecutarse
+backend-java/trafico.json
+# Log de tráfico de docker compose
+backend-java/logs/
+
+# --- simulador-usuarios ---
+simulador-usuarios/target/
+
+# --- IDEs ---
+nbproject/
+nbactions.xml
+nb-configuration.xml
+.idea/
+*.iml
+.vscode/
+
+# --- Sistema ---
+.DS_Store
+Thumbs.db

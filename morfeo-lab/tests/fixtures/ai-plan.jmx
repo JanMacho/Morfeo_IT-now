@@ -1,0 +1,1014 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="MORFEO: tráfico sintético" enabled="true">
+      <stringProp name="TestPlan.comments">Generado por morfeo jmeter a partir de profile.json (4 estados) y endpoints.json (bank-api-stress.jar). Modo curve, factor 60, cola 187 s, semilla 42. Propiedades: protocol, host, port, run_prefix, pool_prefix, create_pool, seed, connect_timeout, response_timeout.</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <stringProp name="TestPlan.user_define_classpath" />
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="morfeo_prefijo" elementType="Argument">
+            <stringProp name="Argument.name">morfeo_prefijo</stringProp>
+            <stringProp name="Argument.value">${__P(run_prefix,jm${__time(yyyyMMddHHmmss,)})}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="morfeo_prefijo_pool" elementType="Argument">
+            <stringProp name="Argument.name">morfeo_prefijo_pool</stringProp>
+            <stringProp name="Argument.value">${__P(pool_prefix,mjpool)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="morfeo_semilla" elementType="Argument">
+            <stringProp name="Argument.name">morfeo_semilla</stringProp>
+            <stringProp name="Argument.value">${__P(seed,42)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="morfeo_modelo" elementType="Argument">
+            <stringProp name="Argument.name">morfeo_modelo</stringProp>
+            <stringProp name="Argument.value">{"version":1,"estados":["GET /api/saldo/{id}","POST /api/ingreso","POST /api/retirada","POST /api/usuario/crear"],"fin":4,"inicio":{"destinos":[0,1,2,3],"acumulada":[0.8035714285714286,0.8729591836734694,0.9163265306122449,1.0]},"filas":[{"destinos":[0,1,2,4],"acumulada":[0.09498069498069497,0.4015444015444015,0.7078507078507078,1.0]},{"destinos":[0,1,2,4],"acumulada":[0.5638036809815952,0.6693251533742333,0.7165644171779142,1.0]},{"destinos":[0,1,2,4],"acumulada":[0.6439127375087966,0.705137227304715,0.7536945812807881,1.0]},{"destinos":[0,1,4],"acumulada":[0.6524390243902439,0.9207317073170732,1.0]}],"espera_global":[173.449,975.56384,1223.74248,1457.20621,1645.41524,1807.5809,1984.4803,2112.64123,2243.7646,2391.07572,2482.4742,2583.90083,2696.35832,2869.3754,2981.87274,3080.72345,3194.26776,3299.1775,3432.94154,3543.42438,3681.436,3822.34613,3937.21466,4078.39433,4196.76968,4319.113,4415.89986,4555.11348,4687.58212,4788.13894,4923.5962,5027.49363,5166.3988,5286.53477,5431.50684,5570.24385,5741.24876,5873.91138,6005.76898,6132.95091,6311.5064,6477.11531,6633.94662,6812.89204,6972.75968,7123.44455,7292.75444,7468.58079,7633.82368,7775.63367,7930.632,8094.14254,8293.12524,8481.02785,8670.9231,8802.3389,8994.16832,9207.82566,9402.56978,9633.61867,9933.6412,10142.18687,10364.99292,10658.51831,10866.46268,11171.9157,11438.62348,11717.82777,11993.4488,12220.09225,12549.884,12932.16091,13181.48964,13672.66576,14004.30822,14521.979,15073.23448,15564.4705,16091.62572,16663.93764,17287.0786,17841.42682,18478.55162,19109.40999,19730.28264,20504.89265,21405.96724,22305.92221,23197.72344,24553.78358,25611.6157,27192.75798,28747.125,30463.10328,32402.77842,35270.9095,39473.68848,44292.70257,52516.61446,66114.06582,316895.575],"espera_por_estado":[[382.686,988.28671,1201.51936,1442.57532,1608.45824,1792.2379,1949.36926,2064.28714,2193.81348,2364.79918,2448.6421,2539.28572,2679.42824,2811.78997,2971.14176,3077.83495,3186.82292,3274.38674,3374.8434,3499.57542,3656.363,3808.19044,3903.53642,4004.733,4129.99088,4292.6005,4384.92452,4503.82319,4639.46336,4747.98948,4890.2178,5011.59386,5141.75348,5235.40986,5397.30194,5509.01,5650.02612,5849.7814,5974.93852,6132.92381,6283.1352,6466.98411,6603.53836,6749.94971,6934.13496,7101.8513,7272.3761,7433.29203,7627.03692,7769.18311,7915.026,8037.00254,8235.64748,8417.78981,8649.95224,8816.3901,8984.9138,9169.93664,9320.1188,9550.93896,9861.6112,10106.45721,10372.77376,10651.61622,10885.43364,11200.23815,11575.2401,11847.62133,12060.13384,12380.18607,12762.5917,13064.55199,13402.11756,13827.1561,14288.62702,14842.9,15385.20092,15836.63969,16584.1688,16987.50232,17658.3338,18343.14377,18994.37318,19690.80131,20286.9736,21081.2152,21955.20694,22724.67725,23631.6424,25141.55928,26672.0309,27836.00241,29451.58204,30839.45995,32605.66826,35258.9242,40163.97656,44320.87572,52363.78782,66604.40601,316895.575],[557.554,1079.61459,1345.79176,1593.46156,1708.2202,1878.74955,2046.23362,2192.58355,2319.18536,2411.67503,2508.879,2599.37825,2693.8104,2818.67617,2963.91824,3098.3163,3215.05584,3320.41859,3494.12458,3584.84225,3690.174,3824.35233,3939.0188,4096.58559,4230.37764,4328.56,4468.88448,4619.87159,4783.39192,4826.10686,4940.9041,5015.79936,5151.39552,5261.41224,5371.94152,5600.69985,5748.72568,5843.81954,5942.86112,6068.62916,6240.6318,6485.38108,6656.35352,6832.25572,6971.52312,7108.3176,7302.54532,7478.33062,7632.62064,7759.99292,7914.9995,8117.76831,8360.53116,8466.9202,8615.37724,8769.2785,8967.99304,9090.69905,9358.37276,9772.22259,10018.8268,10254.70195,10479.21138,10816.89033,11061.49028,11262.2615,11471.26618,11610.9197,11897.1556,12166.38656,12463.3779,12729.29453,13055.03156,13446.77971,13944.2225,14355.5055,14740.34884,15212.13266,15600.20822,16093.24666,16586.2652,17117.78746,17795.45036,18589.52434,19125.5364,19525.7212,20031.92264,21214.98784,22387.07288,23030.68069,24463.0296,25483.65248,27265.09172,28627.19904,32334.74474,35263.57545,37453.74392,44789.14151,51246.14432,64915.69971,220015.962],[368.812,929.2383,1150.1086,1457.5542,1595.7078,1757.4725,1962.3582,2106.889,2228.71,2425.0304,2506.847,2666.2849,2846.0158,2946.566,3029.3194,3099.5905,3233.1232,3391.3694,3517.131,3627.934,3804.778,3990.9066,4125.7186,4197.0062,4289.3932,4406.433,4550.7306,4635.2961,4773.4802,4909.3331,5066.603,5193.8476,5365.5366,5564.2659,5751.2056,5844.6625,5943.4658,6056.9488,6151.5724,6360.1679,6456.136,6692.289,6850.3688,7017.1082,7187.9604,7268.918,7438.7524,7548.126,7758.9934,7966.2476,8096.722,8293.3056,8518.3694,8681.6793,8797.1876,8978.8335,9262.033,9440.604,9695.0728,9857.0076,10015.869,10142.5426,10271.0666,10461.2436,10811.7326,11160.2865,11303.6734,11671.8078,12010.0806,12173.1434,12469.565,12785.8475,13046.9892,13531.5155,13859.8076,14032.923,14762.974,15315.9948,15801.4432,16326.4842,16787.623,17450.5628,17932.5732,18579.2313,19033.3714,19925.705,20970.2572,21853.9391,22856.2406,24364.0883,25124.933,26397.4679,27623.2106,29422.9497,31454.1166,33868.895,37524.1894,42245.2599,52210.8696,66338.3528,103975.382],[173.449,863.868,1325.114,1461.393,1698.63,2123.7435,2298.097,2335.4675,2357.477,2495.283,2619.212,2656.3325,2790.729,2890.789,2978.836,3022.984,3109.141,3194.4105,3206.23,3414.8915,3598.651,3791.93,3919.828,4025.13,4099.916,4211.151,4254.424,4343.81,4417.667,4524.554,4695.183,4778.805,4862.385,4938.598,5241.809,5270.1605,5380.233,5395.2665,5452.218,5539.316,5708.363,5906.146,6093.941,6179.611,6419.824,6471.0975,6517.452,6619.337,6836.366,6931.817,7225.995,7384.9055,7555.009,7805.881,8103.692,8206.33,8348.208,8527.3185,8755.552,9252.9105,9599.854,9883.815,10279.574,10376.2035,10390.677,10601.3425,10751.291,10851.8075,10983.473,11169.0935,11339.018,11402.957,11699.557,12296.6955,12802.372,13548.209,14224.538,14752.396,15548.149,16345.9315,17308.751,17501.074,17852.839,18796.9565,19797.674,20379.6085,20785.541,23236.467,24352.834,26229.8075,27896.345,29651.073,34884.601,38059.7385,40493.923,41575.334,44269.397,49402.6875,53910.935,72516.2305,124620.467]],"max_pasos":81,"pool":50,"pool_ancho":4,"usuarios":["user_001","user_002","user_003","user_004","user_005","user_006","user_008","user_007","user_012","user_014","user_009","user_010","user_013","user_011","user_016","user_018","user_023","user_015","user_017","user_021","user_046","user_038","user_026","user_022","user_040","user_019","user_028","user_029","user_032","user_020","user_024","user_031","user_034","user_037","user_027","user_035","user_030","user_051","user_068","user_081","user_025","user_063","user_033","user_045","user_109","user_039","user_043","user_044","user_048","user_050"],"usuarios_acum":[0.05952380952380952,0.10892857142857143,0.15595238095238095,0.19940476190476192,0.23690476190476192,0.27440476190476193,0.3113095238095238,0.34285714285714286,0.3726190476190476,0.4,0.42619047619047623,0.45178571428571435,0.47738095238095246,0.5023809523809525,0.5250000000000001,0.5458333333333335,0.5666666666666669,0.585714285714286,0.604166666666667,0.622619047619048,0.641071428571429,0.6583333333333338,0.6750000000000005,0.6904761904761909,0.7059523809523813,0.7208333333333337,0.735714285714286,0.7500000000000002,0.7642857142857145,0.7779761904761906,0.7916666666666667,0.8053571428571429,0.819047619047619,0.831547619047619,0.8434523809523808,0.8553571428571427,0.8666666666666665,0.8779761904761902,0.889285714285714,0.9005952380952378,0.9113095238095235,0.9220238095238091,0.9321428571428567,0.9422619047619043,0.9523809523809519,0.9619047619047614,0.9714285714285709,0.9809523809523804,0.9904761904761898,1.0],"gasto_fraccion":[0.05,0.55],"numeros":{"s1":[["morfeo_num_cantidad","lognormal",80.0,0.8,false,1.0,-1.0]],"s2":[["morfeo_num_cantidad","lognormal",80.0,0.8,false,1.0,0.866995]],"s3":[["morfeo_num_saldo_inicial","lognormal",300.0,1.0,false,1.0,-1.0]],"alta":[["morfeo_num_saldo_inicial","lognormal",300.0,1.0,false,1.0,-1.0]]},"textos":{}}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="Destino (propiedades protocol, host, port)" enabled="true">
+        <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+          <collectionProp name="Arguments.arguments" />
+        </elementProp>
+        <stringProp name="HTTPSampler.protocol">${__P(protocol,http)}</stringProp>
+        <stringProp name="HTTPSampler.domain">${__P(host,localhost)}</stringProp>
+        <stringProp name="HTTPSampler.port">${__P(port,7070)}</stringProp>
+        <stringProp name="HTTPSampler.connect_timeout">${__P(connect_timeout,5000)}</stringProp>
+        <stringProp name="HTTPSampler.response_timeout">${__P(response_timeout,60000)}</stringProp>
+        <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+        <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+      </ConfigTestElement>
+      <hashTree />
+      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="Cookies (una sesión por iteración)" enabled="true">
+        <collectionProp name="CookieManager.cookies" />
+        <boolProp name="CookieManager.clearEachIteration">true</boolProp>
+        <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>
+        <stringProp name="CookieManager.policy">standard</stringProp>
+        <stringProp name="CookieManager.implementation">org.apache.jmeter.protocol.http.control.HC4CookieHandler</stringProp>
+      </CookieManager>
+      <hashTree />
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp: alta de 50 usuarios del pool" enabled="true">
+        <intProp name="ThreadGroup.num_threads">4</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.delayedStart">false</boolProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">1</intProp>
+        </elementProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration" />
+        <stringProp name="ThreadGroup.delay" />
+      </SetupThreadGroup>
+      <hashTree>
+        <TestAction guiclass="TestActionGui" testclass="TestAction" testname="Preparar altas del pool" enabled="true">
+          <intProp name="ActionProcessor.action">1</intProp>
+          <intProp name="ActionProcessor.target">0</intProp>
+          <stringProp name="ActionProcessor.duration">0</stringProp>
+        </TestAction>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Primer id del pool" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters">0 4</stringProp>
+            <stringProp name="filename" />
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">// Alta del pool de usuarios: cada hilo da de alta los ids n, n + hilos, ...
+// Parámetros: índice del grupo (0) y número de hilos del setUp. Con la
+// propiedad create_pool=false no se da de alta nadie (el pool ya existe).
+// Modelo de MORFEO: el JSON está en la variable morfeo_modelo del plan. Se
+// interpreta una vez por ejecución y se comparte entre hilos en props.
+String fuente = vars.get('morfeo_modelo')
+Map cache = (Map) props.get('morfeo.modelo')
+if (cache == null || !fuente.equals(cache.fuente)) {
+    synchronized (props) {
+        cache = (Map) props.get('morfeo.modelo')
+        if (cache == null || !fuente.equals(cache.fuente)) {
+            def j = new groovy.json.JsonSlurper().parseText(fuente)
+            def fila = { f -&gt; [f.destinos.collect { it as int } as int[], f.acumulada.collect { it as double } as double[]] }
+            def tabla = { l -&gt; l == null ? null : (l.collect { it as double } as double[]) }
+            Map m = [:]
+            m.estados = j.estados
+            m.fin = j.fin as int
+            m.inicio = fila(j.inicio)
+            m.filas = j.filas.collect { fila(it) }
+            m.esperaGlobal = tabla(j.espera_global)
+            m.espera = j.espera_por_estado.collect { tabla(it) }
+            m.maxPasos = j.max_pasos as int
+            m.pool = j.pool as int
+            m.formatoPool = '%0' + j.pool_ancho + 'd'
+            m.usuarios = j.usuarios == null ? null : j.usuarios.collect { it as String }
+            m.usuariosAcum = j.usuarios_acum == null ? null : (j.usuarios_acum.collect { it as double } as double[])
+            m.gastoMin = j.gasto_fraccion[0] as double
+            m.gastoMax = j.gasto_fraccion[1] as double
+            Map numeros = [:]
+            j.numeros.each { k, l -&gt;
+                numeros[k] = l.collect { f -&gt; [f[0] as String, f[1] == 'uniform', f[2] as double, f[3] as double, f[4] as boolean, f[5] as double, f[6] as double] }
+            }
+            m.numeros = numeros
+            Map textos = [:]
+            j.textos.each { k, l -&gt;
+                textos[k] = l.collect { f -&gt; [f[0] as String, f[1] as String, f[2], f[3]] }
+            }
+            m.textos = textos
+            cache = [fuente: fuente, m: m]
+            props.put('morfeo.modelo', cache)
+            log.info('MORFEO: modelo cargado con ' + m.estados.size() + ' estados')
+        }
+    }
+}
+Map M = (Map) cache.m
+
+// Generador aleatorio propio de cada hilo: semilla, grupo (args[0]), número de
+// hilo y, en modo distribuido, el servidor. Un servidor de JMeter (-R) guarda
+// su host:puerto en la propiedad __jm.D_TG antes de cada prueba; en una
+// ejecución local está vacía. Con ella cada servidor sortea sesiones distintas
+// y añade su nombre al prefijo de las altas en sesión, para que no choquen.
+Random rng = (Random) vars.getObject('morfeo_rng')
+if (rng == null) {
+    String servidor = props.getProperty('__jm.D_TG', '').trim()
+    long base = Long.parseLong(vars.get('morfeo_semilla').trim()) * 1000003L + Long.parseLong(args[0]) * 10007L + ctx.getThreadNum()
+    if (!servidor.isEmpty()) {
+        base = base * 1000033L + servidor.hashCode()
+        vars.put('morfeo_prefijo', vars.get('morfeo_prefijo') + '_' + servidor.replaceAll('[^A-Za-z0-9]', '-'))
+    }
+    rng = new Random(new SplittableRandom(base).nextLong())
+    vars.putObject('morfeo_rng', rng)
+    vars.put('morfeo_grupo', args[0])
+    vars.put('morfeo_servidor', servidor)
+}
+
+if (props.getProperty('create_pool', 'true').trim().equalsIgnoreCase('false')) {
+    vars.put('morfeo_seguir', 'false')
+    if (ctx.getThreadNum() == 0) {
+        log.info('MORFEO: create_pool=false, no se da de alta el pool')
+    }
+    return
+}
+int n = ctx.getThreadNum() + 1
+vars.put('morfeo_alta_n', String.valueOf(n))
+vars.put('morfeo_seguir', n &lt;= (M.pool as int) ? 'true' : 'false')
+if (n &lt;= (M.pool as int)) {
+    vars.put('morfeo_usuario', idPool(M, vars, n))
+}
+
+// Id del usuario número n (desde 1) del pool: de la lista del modelo o, sin
+// lista, &lt;prefijo&gt;_p&lt;n&gt;.
+String idPool(Map M, def vars, int n) {
+    if (M.usuarios != null) {
+        return ((List) M.usuarios).get(n - 1)
+    }
+    return vars.get('morfeo_prefijo_pool') + '_p' + String.format((String) M.formatoPool, n)
+}
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree />
+        </hashTree>
+        <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Mientras queden altas" enabled="true">
+          <stringProp name="WhileController.condition">${morfeo_seguir}</stringProp>
+        </WhileController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="alta pool POST /api/usuario/crear" enabled="true">
+            <stringProp name="HTTPSampler.path">/api/usuario/crear</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{"id":"${morfeo_usuario}","saldo_inicial":${morfeo_num_saldo_inicial}}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Cabeceras" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree />
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Valores del cuerpo" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters">alta</stringProp>
+              <stringProp name="filename" />
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// Valores del cuerpo de esta petición (args[0] es su clave en el modelo).
+// Números: lognormal (mediana por exp(sigma por N(0,1))) o uniforme, nunca por
+// debajo del mínimo del campo. Si el campo es un importe a retirar y se conoce
+// el saldo, con la probabilidad de f[6] es una parte del saldo visto
+// (si no, puede no haber fondos). Enteros redondeados; el resto, con dos
+// decimales. Textos: elegidos entre los valores del enum, uuid, email, fecha o
+// texto de la longitud del esquema.
+Map M = (Map) props.get('morfeo.modelo').m
+Random rng = (Random) vars.getObject('morfeo_rng')
+double saldo = -1d
+String visto = vars.get('morfeo_saldo')
+if (visto != null &amp;&amp; !visto.isEmpty()) {
+    try { saldo = Double.parseDouble(visto) } catch (NumberFormatException e) { saldo = -1d }
+}
+for (List f : (List) M.numeros[args[0]]) {
+    double a = (double) f[2]
+    double b = (double) f[3]
+    double v
+    if (f[1]) {
+        v = a + (b - a) * rng.nextDouble()
+    } else {
+        v = a * Math.exp(b * rng.nextGaussian())
+    }
+    v = Math.max((double) f[5], v)
+    double p = (double) f[6]
+    if (p &gt;= 0d &amp;&amp; saldo &gt; 0d &amp;&amp; rng.nextDouble() &lt; p) {
+        v = Math.floor(saldo * ((double) M.gastoMin + ((double) M.gastoMax - (double) M.gastoMin) * rng.nextDouble()) * 100d) / 100d
+        v = Math.max(0.01d, v)
+    }
+    String texto = f[4] ? String.valueOf(Math.round(v)) : BigDecimal.valueOf(v).setScale(2, java.math.RoundingMode.HALF_UP).toPlainString()
+    vars.put((String) f[0], texto)
+}
+for (List f : (List) M.textos[args[0]]) {
+    String tipo = (String) f[1]
+    String texto
+    if (tipo == 'enum') {
+        List valores = (List) f[2]
+        texto = String.valueOf(valores.get(rng.nextInt(valores.size())))
+    } else if (tipo == 'uuid') {
+        texto = new UUID(rng.nextLong(), rng.nextLong()).toString()
+    } else if (tipo == 'email') {
+        texto = 'usuario' + rng.nextInt(1000000) + '@example.com'
+    } else if (tipo == 'date') {
+        texto = java.time.LocalDate.now().minusDays(rng.nextInt(365)).toString()
+    } else if (tipo == 'date-time') {
+        texto = java.time.Instant.now().minusSeconds(rng.nextInt(86400 * 30)).toString()
+    } else {
+        int minimo = ((List) f[2])[0] as int
+        int maximo = ((List) f[2])[1] as int
+        int largo = minimo + rng.nextInt(maximo - minimo + 1)
+        StringBuilder sb = new StringBuilder()
+        String letras = 'abcdefghijklmnopqrstuvwxyz'
+        for (int i = 0; i &lt; largo; i++) {
+            sb.append(letras.charAt(rng.nextInt(letras.length())))
+        }
+        texto = sb.toString()
+    }
+    vars.put((String) f[0], texto)
+}
+</stringProp>
+            </JSR223PreProcessor>
+            <hashTree />
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Alta correcta (201 o 409)" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="0">201|409</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message" />
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">true</boolProp>
+              <intProp name="Assertion.test_type">1</intProp>
+            </ResponseAssertion>
+            <hashTree />
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Siguiente id del pool" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters">4</stringProp>
+              <stringProp name="filename" />
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">// Siguiente id del pool para este hilo. Parámetro: número de hilos del setUp.
+Map M = (Map) props.get('morfeo.modelo').m
+int n = Integer.parseInt(vars.get('morfeo_alta_n')) + Integer.parseInt(args[0])
+vars.put('morfeo_alta_n', String.valueOf(n))
+if (n &gt; (M.pool as int)) {
+    vars.put('morfeo_seguir', 'false')
+} else {
+    vars.put('morfeo_usuario', idPool(M, vars, n))
+}
+
+// Id del usuario número n (desde 1) del pool: de la lista del modelo o, sin
+// lista, &lt;prefijo&gt;_p&lt;n&gt;.
+String idPool(Map M, def vars, int n) {
+    if (M.usuarios != null) {
+        return ((List) M.usuarios).get(n - 1)
+    }
+    return vars.get('morfeo_prefijo_pool') + '_p' + String.format((String) M.formatoPool, n)
+}
+</stringProp>
+            </JSR223PostProcessor>
+            <hashTree />
+          </hashTree>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="hora 10: 2424.0 sesiones/h" enabled="true">
+        <intProp name="ThreadGroup.num_threads">42</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.delayedStart">true</boolProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </elementProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">227</stringProp>
+        <stringProp name="ThreadGroup.delay">0</stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="2xx, 3xx y 4xx son respuestas válidas; 5xx es fallo" enabled="true">
+          <collectionProp name="Asserion.test_strings">
+            <stringProp name="0">[234][0-9][0-9]</stringProp>
+          </collectionProp>
+          <stringProp name="Assertion.custom_message" />
+          <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+          <boolProp name="Assertion.assume_success">true</boolProp>
+          <intProp name="Assertion.test_type">1</intProp>
+        </ResponseAssertion>
+        <hashTree />
+        <TestAction guiclass="TestActionGui" testclass="TestAction" testname="Inicio de sesión" enabled="true">
+          <intProp name="ActionProcessor.action">1</intProp>
+          <intProp name="ActionProcessor.target">0</intProp>
+          <stringProp name="ActionProcessor.duration">0</stringProp>
+        </TestAction>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Usuario y primer estado" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters">1</stringProp>
+            <stringProp name="filename" />
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">// Inicio de sesión: usuario al azar del pool y primer estado (fila START).
+// Parámetros: índice del grupo de hilos.
+// Modelo de MORFEO: el JSON está en la variable morfeo_modelo del plan. Se
+// interpreta una vez por ejecución y se comparte entre hilos en props.
+String fuente = vars.get('morfeo_modelo')
+Map cache = (Map) props.get('morfeo.modelo')
+if (cache == null || !fuente.equals(cache.fuente)) {
+    synchronized (props) {
+        cache = (Map) props.get('morfeo.modelo')
+        if (cache == null || !fuente.equals(cache.fuente)) {
+            def j = new groovy.json.JsonSlurper().parseText(fuente)
+            def fila = { f -&gt; [f.destinos.collect { it as int } as int[], f.acumulada.collect { it as double } as double[]] }
+            def tabla = { l -&gt; l == null ? null : (l.collect { it as double } as double[]) }
+            Map m = [:]
+            m.estados = j.estados
+            m.fin = j.fin as int
+            m.inicio = fila(j.inicio)
+            m.filas = j.filas.collect { fila(it) }
+            m.esperaGlobal = tabla(j.espera_global)
+            m.espera = j.espera_por_estado.collect { tabla(it) }
+            m.maxPasos = j.max_pasos as int
+            m.pool = j.pool as int
+            m.formatoPool = '%0' + j.pool_ancho + 'd'
+            m.usuarios = j.usuarios == null ? null : j.usuarios.collect { it as String }
+            m.usuariosAcum = j.usuarios_acum == null ? null : (j.usuarios_acum.collect { it as double } as double[])
+            m.gastoMin = j.gasto_fraccion[0] as double
+            m.gastoMax = j.gasto_fraccion[1] as double
+            Map numeros = [:]
+            j.numeros.each { k, l -&gt;
+                numeros[k] = l.collect { f -&gt; [f[0] as String, f[1] == 'uniform', f[2] as double, f[3] as double, f[4] as boolean, f[5] as double, f[6] as double] }
+            }
+            m.numeros = numeros
+            Map textos = [:]
+            j.textos.each { k, l -&gt;
+                textos[k] = l.collect { f -&gt; [f[0] as String, f[1] as String, f[2], f[3]] }
+            }
+            m.textos = textos
+            cache = [fuente: fuente, m: m]
+            props.put('morfeo.modelo', cache)
+            log.info('MORFEO: modelo cargado con ' + m.estados.size() + ' estados')
+        }
+    }
+}
+Map M = (Map) cache.m
+
+// Generador aleatorio propio de cada hilo: semilla, grupo (args[0]), número de
+// hilo y, en modo distribuido, el servidor. Un servidor de JMeter (-R) guarda
+// su host:puerto en la propiedad __jm.D_TG antes de cada prueba; en una
+// ejecución local está vacía. Con ella cada servidor sortea sesiones distintas
+// y añade su nombre al prefijo de las altas en sesión, para que no choquen.
+Random rng = (Random) vars.getObject('morfeo_rng')
+if (rng == null) {
+    String servidor = props.getProperty('__jm.D_TG', '').trim()
+    long base = Long.parseLong(vars.get('morfeo_semilla').trim()) * 1000003L + Long.parseLong(args[0]) * 10007L + ctx.getThreadNum()
+    if (!servidor.isEmpty()) {
+        base = base * 1000033L + servidor.hashCode()
+        vars.put('morfeo_prefijo', vars.get('morfeo_prefijo') + '_' + servidor.replaceAll('[^A-Za-z0-9]', '-'))
+    }
+    rng = new Random(new SplittableRandom(base).nextLong())
+    vars.putObject('morfeo_rng', rng)
+    vars.put('morfeo_grupo', args[0])
+    vars.put('morfeo_servidor', servidor)
+}
+
+// Con lista de usuarios (sacada de los logs) se elige con la frecuencia con que
+// cada uno aparece en ellos; sin lista, al azar entre los del pool.
+int n
+if (M.usuariosAcum != null) {
+    double[] acum = (double[]) M.usuariosAcum
+    double u = rng.nextDouble()
+    n = 1
+    while (n &lt; acum.length &amp;&amp; u &gt;= acum[n - 1]) {
+        n++
+    }
+} else {
+    n = 1 + rng.nextInt(M.pool as int)
+}
+vars.put('morfeo_usuario', idPool(M, vars, n))
+vars.put('morfeo_estado', String.valueOf(sortear((List) M.inicio, rng)))
+vars.put('morfeo_anterior', '-1')
+vars.put('morfeo_paso', '0')
+vars.put('morfeo_seguir', 'true')
+vars.put('morfeo_saldo', '')
+
+// Id del usuario número n (desde 1) del pool: de la lista del modelo o, sin
+// lista, &lt;prefijo&gt;_p&lt;n&gt;.
+String idPool(Map M, def vars, int n) {
+    if (M.usuarios != null) {
+        return ((List) M.usuarios).get(n - 1)
+    }
+    return vars.get('morfeo_prefijo_pool') + '_p' + String.format((String) M.formatoPool, n)
+}
+
+// Siguiente estado de una fila de la matriz: destinos y probabilidad acumulada.
+int sortear(List fila, Random rng) {
+    int[] destinos = (int[]) fila[0]
+    double[] acumulada = (double[]) fila[1]
+    double u = rng.nextDouble()
+    for (int i = 0; i &lt; acumulada.length; i++) {
+        if (u &lt; acumulada[i]) {
+            return destinos[i]
+        }
+    }
+    return destinos[destinos.length - 1]
+}
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree />
+          <JSR223Timer guiclass="TestBeanGUI" testclass="JSR223Timer" testname="Llegada de la sesión (Poisson del grupo)" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters">0.673333333 40</stringProp>
+            <stringProp name="filename" />
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">// Llegadas de sesiones: un solo proceso de Poisson por grupo de hilos, de tasa
+// args[0] sesiones por segundo, compartido por todos sus hilos. Cada hilo que
+// queda libre toma la siguiente llegada prevista del grupo y espera hasta su
+// hora. Si esa hora ya ha pasado (todos los hilos estaban ocupados), la sesión
+// empieza en el acto y se anota el retraso. La ventana (args[1] segundos)
+// empieza con el primer hilo del grupo. Ninguna sesión empieza después de la
+// ventana: las llegadas que no han podido empezar dentro de ella se descartan
+// y se cuentan. El estado del grupo está en props, con la hora de inicio de la
+// prueba en la clave, y el resumen lo escribe el tearDown.
+double tasa = Double.parseDouble(args[0])
+long ventanaMs = Math.round(Double.parseDouble(args[1]) * 1000d)
+String clave = 'morfeo.llegadas.' + org.apache.jmeter.threads.JMeterContextService.getTestStartTime() + '.' + vars.get('morfeo_grupo')
+Map L = (Map) props.get(clave)
+if (L == null) {
+    synchronized (props) {
+        L = (Map) props.get(clave)
+        if (L == null) {
+            long base = (Long.parseLong(vars.get('morfeo_semilla').trim()) * 1000003L + Long.parseLong(vars.get('morfeo_grupo')) * 10007L) ^ 0x5DEECE66DL
+            String servidor = vars.get('morfeo_servidor') ?: ''
+            if (!servidor.isEmpty()) {
+                base = base * 1000033L + servidor.hashCode()
+            }
+            long t0 = System.currentTimeMillis()
+            L = new HashMap()
+            L.grupo = ctx.getThreadGroup().getName()
+            L.indice = Integer.parseInt(vars.get('morfeo_grupo'))
+            L.tasa = tasa
+            L.ventana = ventanaMs
+            L.fin = t0 + ventanaMs
+            L.siguiente = (double) t0
+            L.rng = new Random(new SplittableRandom(base).nextLong())
+            L.cerrada = false
+            L.empezadas = 0L
+            L.tarde = 0L
+            L.retraso = 0d
+            L.retrasoMax = 0d
+            L.descartadas = 0L
+            props.put(clave, L)
+        }
+    }
+}
+long ahora = System.currentTimeMillis()
+double llegada = -1d
+synchronized (L) {
+    Random r = (Random) L.rng
+    long fin = (long) L.fin
+    if (!L.cerrada &amp;&amp; ahora &gt;= fin) {
+        // La ventana ha acabado con llegadas sin empezar: se cuentan y se cierra.
+        double x = (double) L.siguiente + (-Math.log(1d - r.nextDouble()) / tasa) * 1000d
+        while (x &lt; fin) {
+            L.siguiente = x
+            L.descartadas = (long) L.descartadas + 1L
+            x = x + (-Math.log(1d - r.nextDouble()) / tasa) * 1000d
+        }
+        L.cerrada = true
+    }
+    if (!L.cerrada) {
+        double x = (double) L.siguiente + (-Math.log(1d - r.nextDouble()) / tasa) * 1000d
+        if (x &gt;= fin) {
+            L.cerrada = true
+        } else {
+            L.siguiente = x
+            llegada = x
+            double retraso = Math.max(0d, ahora - x)
+            L.empezadas = (long) L.empezadas + 1L
+            L.retraso = (double) L.retraso + retraso
+            L.retrasoMax = Math.max((double) L.retrasoMax, retraso)
+            if (retraso &gt; 1000d) {
+                L.tarde = (long) L.tarde + 1L
+            }
+        }
+    }
+}
+if (llegada &lt; 0d) {
+    vars.put('morfeo_seguir', 'false')
+    ctx.getThread().stop()
+    return 0L
+}
+return Math.max(0L, Math.round(llegada - ahora))
+</stringProp>
+          </JSR223Timer>
+          <hashTree />
+        </hashTree>
+        <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Peticiones de la sesión" enabled="true">
+          <stringProp name="WhileController.condition">${morfeo_seguir}</stringProp>
+        </WhileController>
+        <hashTree>
+          <JSR223Timer guiclass="TestBeanGUI" testclass="JSR223Timer" testname="Tiempo de espera (think time)" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters" />
+            <stringProp name="filename" />
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">// Espera desde el fin de la petición anterior hasta el inicio de esta:
+// think_time_ms.by_state del estado anterior o, si no hay, el global. Se
+// sortea por inversión de los 101 percentiles con interpolación lineal, como
+// sample_from_dist de MORFEO. La primera petición de la sesión no espera.
+if (vars.get('morfeo_paso') == '0') {
+    return 0L
+}
+Map M = (Map) props.get('morfeo.modelo').m
+Random rng = (Random) vars.getObject('morfeo_rng')
+int anterior = Integer.parseInt(vars.get('morfeo_anterior'))
+double[] q = (double[]) M.espera[anterior]
+if (q == null) {
+    q = (double[]) M.esperaGlobal
+}
+if (q == null || q.length == 0) {
+    return 0L
+}
+double x = rng.nextDouble() * (q.length - 1)
+int i = (int) x
+double v = (i &gt;= q.length - 1) ? q[q.length - 1] : q[i] + (q[i + 1] - q[i]) * (x - i)
+return Math.max(0L, Math.round(v))
+</stringProp>
+          </JSR223Timer>
+          <hashTree />
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Siguiente estado (Markov)" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters" />
+            <stringProp name="filename" />
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">// Siguiente estado de la sesión, sorteado en la fila del estado que se acaba
+// de ejecutar. La sesión termina en END o al llegar al máximo de pasos.
+Map M = (Map) props.get('morfeo.modelo').m
+Random rng = (Random) vars.getObject('morfeo_rng')
+// El saldo que ve el usuario en la respuesta ("saldo" o "saldo_actual"): sirve
+// para que una retirada sea, casi siempre, una parte de lo que tiene.
+String cuerpo = prev == null ? null : prev.getResponseDataAsString()
+if (cuerpo != null) {
+    java.util.regex.Matcher visto = java.util.regex.Pattern.compile('"saldo(_actual)?"[ ]*:[ ]*(-?[0-9][0-9.Ee+-]*)').matcher(cuerpo)
+    if (visto.find()) {
+        vars.put('morfeo_saldo', visto.group(2))
+    }
+}
+int actual = Integer.parseInt(vars.get('morfeo_estado'))
+int paso = Integer.parseInt(vars.get('morfeo_paso')) + 1
+vars.put('morfeo_anterior', String.valueOf(actual))
+vars.put('morfeo_paso', String.valueOf(paso))
+int siguiente = sortear((List) M.filas[actual], rng)
+if (siguiente == (M.fin as int) || paso &gt;= (M.maxPasos as int)) {
+    vars.put('morfeo_seguir', 'false')
+} else {
+    vars.put('morfeo_estado', String.valueOf(siguiente))
+}
+
+// Siguiente estado de una fila de la matriz: destinos y probabilidad acumulada.
+int sortear(List fila, Random rng) {
+    int[] destinos = (int[]) fila[0]
+    double[] acumulada = (double[]) fila[1]
+    double u = rng.nextDouble()
+    for (int i = 0; i &lt; acumulada.length; i++) {
+        if (u &lt; acumulada[i]) {
+            return destinos[i]
+        }
+    }
+    return destinos[destinos.length - 1]
+}
+</stringProp>
+          </JSR223PostProcessor>
+          <hashTree />
+          <SwitchController guiclass="SwitchControllerGui" testclass="SwitchController" testname="Petición del estado actual" enabled="true">
+            <stringProp name="SwitchController.value">${morfeo_estado}</stringProp>
+          </SwitchController>
+          <hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/saldo/{id}" enabled="true">
+              <stringProp name="HTTPSampler.path">/api/saldo/${morfeo_usuario}</stringProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+              <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                <collectionProp name="Arguments.arguments" />
+              </elementProp>
+            </HTTPSamplerProxy>
+            <hashTree />
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /api/ingreso" enabled="true">
+              <stringProp name="HTTPSampler.path">/api/ingreso</stringProp>
+              <stringProp name="HTTPSampler.method">POST</stringProp>
+              <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+              <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.value">{"id":"${morfeo_usuario}","cantidad":${morfeo_num_cantidad}}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Cabeceras" enabled="true">
+                <collectionProp name="HeaderManager.headers">
+                  <elementProp name="" elementType="Header">
+                    <stringProp name="Header.name">Content-Type</stringProp>
+                    <stringProp name="Header.value">application/json</stringProp>
+                  </elementProp>
+                </collectionProp>
+              </HeaderManager>
+              <hashTree />
+              <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Valores del cuerpo" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters">s1</stringProp>
+                <stringProp name="filename" />
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">// Valores del cuerpo de esta petición (args[0] es su clave en el modelo).
+// Números: lognormal (mediana por exp(sigma por N(0,1))) o uniforme, nunca por
+// debajo del mínimo del campo. Si el campo es un importe a retirar y se conoce
+// el saldo, con la probabilidad de f[6] es una parte del saldo visto
+// (si no, puede no haber fondos). Enteros redondeados; el resto, con dos
+// decimales. Textos: elegidos entre los valores del enum, uuid, email, fecha o
+// texto de la longitud del esquema.
+Map M = (Map) props.get('morfeo.modelo').m
+Random rng = (Random) vars.getObject('morfeo_rng')
+double saldo = -1d
+String visto = vars.get('morfeo_saldo')
+if (visto != null &amp;&amp; !visto.isEmpty()) {
+    try { saldo = Double.parseDouble(visto) } catch (NumberFormatException e) { saldo = -1d }
+}
+for (List f : (List) M.numeros[args[0]]) {
+    double a = (double) f[2]
+    double b = (double) f[3]
+    double v
+    if (f[1]) {
+        v = a + (b - a) * rng.nextDouble()
+    } else {
+        v = a * Math.exp(b * rng.nextGaussian())
+    }
+    v = Math.max((double) f[5], v)
+    double p = (double) f[6]
+    if (p &gt;= 0d &amp;&amp; saldo &gt; 0d &amp;&amp; rng.nextDouble() &lt; p) {
+        v = Math.floor(saldo * ((double) M.gastoMin + ((double) M.gastoMax - (double) M.gastoMin) * rng.nextDouble()) * 100d) / 100d
+        v = Math.max(0.01d, v)
+    }
+    String texto = f[4] ? String.valueOf(Math.round(v)) : BigDecimal.valueOf(v).setScale(2, java.math.RoundingMode.HALF_UP).toPlainString()
+    vars.put((String) f[0], texto)
+}
+for (List f : (List) M.textos[args[0]]) {
+    String tipo = (String) f[1]
+    String texto
+    if (tipo == 'enum') {
+        List valores = (List) f[2]
+        texto = String.valueOf(valores.get(rng.nextInt(valores.size())))
+    } else if (tipo == 'uuid') {
+        texto = new UUID(rng.nextLong(), rng.nextLong()).toString()
+    } else if (tipo == 'email') {
+        texto = 'usuario' + rng.nextInt(1000000) + '@example.com'
+    } else if (tipo == 'date') {
+        texto = java.time.LocalDate.now().minusDays(rng.nextInt(365)).toString()
+    } else if (tipo == 'date-time') {
+        texto = java.time.Instant.now().minusSeconds(rng.nextInt(86400 * 30)).toString()
+    } else {
+        int minimo = ((List) f[2])[0] as int
+        int maximo = ((List) f[2])[1] as int
+        int largo = minimo + rng.nextInt(maximo - minimo + 1)
+        StringBuilder sb = new StringBuilder()
+        String letras = 'abcdefghijklmnopqrstuvwxyz'
+        for (int i = 0; i &lt; largo; i++) {
+            sb.append(letras.charAt(rng.nextInt(letras.length())))
+        }
+        texto = sb.toString()
+    }
+    vars.put((String) f[0], texto)
+}
+</stringProp>
+              </JSR223PreProcessor>
+              <hashTree />
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /api/retirada" enabled="true">
+              <stringProp name="HTTPSampler.path">/api/retirada</stringProp>
+              <stringProp name="HTTPSampler.method">POST</stringProp>
+              <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+              <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.value">{"id":"${morfeo_usuario}","cantidad":${morfeo_num_cantidad}}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Cabeceras" enabled="true">
+                <collectionProp name="HeaderManager.headers">
+                  <elementProp name="" elementType="Header">
+                    <stringProp name="Header.name">Content-Type</stringProp>
+                    <stringProp name="Header.value">application/json</stringProp>
+                  </elementProp>
+                </collectionProp>
+              </HeaderManager>
+              <hashTree />
+              <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Valores del cuerpo" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters">s2</stringProp>
+                <stringProp name="filename" />
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">// Valores del cuerpo de esta petición (args[0] es su clave en el modelo).
+// Números: lognormal (mediana por exp(sigma por N(0,1))) o uniforme, nunca por
+// debajo del mínimo del campo. Si el campo es un importe a retirar y se conoce
+// el saldo, con la probabilidad de f[6] es una parte del saldo visto
+// (si no, puede no haber fondos). Enteros redondeados; el resto, con dos
+// decimales. Textos: elegidos entre los valores del enum, uuid, email, fecha o
+// texto de la longitud del esquema.
+Map M = (Map) props.get('morfeo.modelo').m
+Random rng = (Random) vars.getObject('morfeo_rng')
+double saldo = -1d
+String visto = vars.get('morfeo_saldo')
+if (visto != null &amp;&amp; !visto.isEmpty()) {
+    try { saldo = Double.parseDouble(visto) } catch (NumberFormatException e) { saldo = -1d }
+}
+for (List f : (List) M.numeros[args[0]]) {
+    double a = (double) f[2]
+    double b = (double) f[3]
+    double v
+    if (f[1]) {
+        v = a + (b - a) * rng.nextDouble()
+    } else {
+        v = a * Math.exp(b * rng.nextGaussian())
+    }
+    v = Math.max((double) f[5], v)
+    double p = (double) f[6]
+    if (p &gt;= 0d &amp;&amp; saldo &gt; 0d &amp;&amp; rng.nextDouble() &lt; p) {
+        v = Math.floor(saldo * ((double) M.gastoMin + ((double) M.gastoMax - (double) M.gastoMin) * rng.nextDouble()) * 100d) / 100d
+        v = Math.max(0.01d, v)
+    }
+    String texto = f[4] ? String.valueOf(Math.round(v)) : BigDecimal.valueOf(v).setScale(2, java.math.RoundingMode.HALF_UP).toPlainString()
+    vars.put((String) f[0], texto)
+}
+for (List f : (List) M.textos[args[0]]) {
+    String tipo = (String) f[1]
+    String texto
+    if (tipo == 'enum') {
+        List valores = (List) f[2]
+        texto = String.valueOf(valores.get(rng.nextInt(valores.size())))
+    } else if (tipo == 'uuid') {
+        texto = new UUID(rng.nextLong(), rng.nextLong()).toString()
+    } else if (tipo == 'email') {
+        texto = 'usuario' + rng.nextInt(1000000) + '@example.com'
+    } else if (tipo == 'date') {
+        texto = java.time.LocalDate.now().minusDays(rng.nextInt(365)).toString()
+    } else if (tipo == 'date-time') {
+        texto = java.time.Instant.now().minusSeconds(rng.nextInt(86400 * 30)).toString()
+    } else {
+        int minimo = ((List) f[2])[0] as int
+        int maximo = ((List) f[2])[1] as int
+        int largo = minimo + rng.nextInt(maximo - minimo + 1)
+        StringBuilder sb = new StringBuilder()
+        String letras = 'abcdefghijklmnopqrstuvwxyz'
+        for (int i = 0; i &lt; largo; i++) {
+            sb.append(letras.charAt(rng.nextInt(letras.length())))
+        }
+        texto = sb.toString()
+    }
+    vars.put((String) f[0], texto)
+}
+</stringProp>
+              </JSR223PreProcessor>
+              <hashTree />
+            </hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /api/usuario/crear" enabled="true">
+              <stringProp name="HTTPSampler.path">/api/usuario/crear</stringProp>
+              <stringProp name="HTTPSampler.method">POST</stringProp>
+              <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+              <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.value">{"id":"${morfeo_usuario}","saldo_inicial":${morfeo_num_saldo_inicial}}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Cabeceras" enabled="true">
+                <collectionProp name="HeaderManager.headers">
+                  <elementProp name="" elementType="Header">
+                    <stringProp name="Header.name">Content-Type</stringProp>
+                    <stringProp name="Header.value">application/json</stringProp>
+                  </elementProp>
+                </collectionProp>
+              </HeaderManager>
+              <hashTree />
+              <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Id nuevo para el alta" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters" />
+                <stringProp name="filename" />
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">// La sesión da de alta un usuario: pasa a un id nuevo y único, que usa
+// hasta el final de la sesión: &lt;prefijo&gt;_t&lt;grupo&gt;-&lt;hilo&gt;_&lt;contador&gt;.
+int c = Integer.parseInt(vars.get('morfeo_altas') ?: '0') + 1
+vars.put('morfeo_altas', String.valueOf(c))
+vars.put('morfeo_usuario', vars.get('morfeo_prefijo') + '_t' + vars.get('morfeo_grupo') + '-' + (ctx.getThreadNum() + 1) + '_' + c)
+</stringProp>
+              </JSR223PreProcessor>
+              <hashTree />
+              <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Valores del cuerpo" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="parameters">s3</stringProp>
+                <stringProp name="filename" />
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">// Valores del cuerpo de esta petición (args[0] es su clave en el modelo).
+// Números: lognormal (mediana por exp(sigma por N(0,1))) o uniforme, nunca por
+// debajo del mínimo del campo. Si el campo es un importe a retirar y se conoce
+// el saldo, con la probabilidad de f[6] es una parte del saldo visto
+// (si no, puede no haber fondos). Enteros redondeados; el resto, con dos
+// decimales. Textos: elegidos entre los valores del enum, uuid, email, fecha o
+// texto de la longitud del esquema.
+Map M = (Map) props.get('morfeo.modelo').m
+Random rng = (Random) vars.getObject('morfeo_rng')
+double saldo = -1d
+String visto = vars.get('morfeo_saldo')
+if (visto != null &amp;&amp; !visto.isEmpty()) {
+    try { saldo = Double.parseDouble(visto) } catch (NumberFormatException e) { saldo = -1d }
+}
+for (List f : (List) M.numeros[args[0]]) {
+    double a = (double) f[2]
+    double b = (double) f[3]
+    double v
+    if (f[1]) {
+        v = a + (b - a) * rng.nextDouble()
+    } else {
+        v = a * Math.exp(b * rng.nextGaussian())
+    }
+    v = Math.max((double) f[5], v)
+    double p = (double) f[6]
+    if (p &gt;= 0d &amp;&amp; saldo &gt; 0d &amp;&amp; rng.nextDouble() &lt; p) {
+        v = Math.floor(saldo * ((double) M.gastoMin + ((double) M.gastoMax - (double) M.gastoMin) * rng.nextDouble()) * 100d) / 100d
+        v = Math.max(0.01d, v)
+    }
+    String texto = f[4] ? String.valueOf(Math.round(v)) : BigDecimal.valueOf(v).setScale(2, java.math.RoundingMode.HALF_UP).toPlainString()
+    vars.put((String) f[0], texto)
+}
+for (List f : (List) M.textos[args[0]]) {
+    String tipo = (String) f[1]
+    String texto
+    if (tipo == 'enum') {
+        List valores = (List) f[2]
+        texto = String.valueOf(valores.get(rng.nextInt(valores.size())))
+    } else if (tipo == 'uuid') {
+        texto = new UUID(rng.nextLong(), rng.nextLong()).toString()
+    } else if (tipo == 'email') {
+        texto = 'usuario' + rng.nextInt(1000000) + '@example.com'
+    } else if (tipo == 'date') {
+        texto = java.time.LocalDate.now().minusDays(rng.nextInt(365)).toString()
+    } else if (tipo == 'date-time') {
+        texto = java.time.Instant.now().minusSeconds(rng.nextInt(86400 * 30)).toString()
+    } else {
+        int minimo = ((List) f[2])[0] as int
+        int maximo = ((List) f[2])[1] as int
+        int largo = minimo + rng.nextInt(maximo - minimo + 1)
+        StringBuilder sb = new StringBuilder()
+        String letras = 'abcdefghijklmnopqrstuvwxyz'
+        for (int i = 0; i &lt; largo; i++) {
+            sb.append(letras.charAt(rng.nextInt(letras.length())))
+        }
+        texto = sb.toString()
+    }
+    vars.put((String) f[0], texto)
+}
+</stringProp>
+              </JSR223PreProcessor>
+              <hashTree />
+            </hashTree>
+          </hashTree>
+        </hashTree>
+      </hashTree>
+      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown: resumen de llegadas" enabled="true">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.delayedStart">false</boolProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">1</intProp>
+        </elementProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration" />
+        <stringProp name="ThreadGroup.delay" />
+      </PostThreadGroup>
+      <hashTree>
+        <TestAction guiclass="TestActionGui" testclass="TestAction" testname="Resumen de llegadas" enabled="true">
+          <intProp name="ActionProcessor.action">1</intProp>
+          <intProp name="ActionProcessor.target">0</intProp>
+          <stringProp name="ActionProcessor.duration">0</stringProp>
+        </TestAction>
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Sesiones empezadas por grupo" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters" />
+            <stringProp name="filename" />
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">// Resumen de las llegadas de cada grupo de hilos, en jmeter.log y en la
+// consola: llegadas sorteadas en la ventana, sesiones empezadas, retrasos y
+// llegadas que no pudieron empezar porque todos los hilos estaban ocupados.
+String pre = 'morfeo.llegadas.' + org.apache.jmeter.threads.JMeterContextService.getTestStartTime() + '.'
+List claves = new ArrayList(props.keySet()).findAll { it.toString().startsWith(pre) }
+claves.sort { a, b -&gt; (((Map) props.get(a)).indice as int) &lt;=&gt; (((Map) props.get(b)).indice as int) }
+for (Object k : claves) {
+    Map L = (Map) props.get(k)
+    String linea
+    synchronized (L) {
+        if (!L.cerrada) {
+            // El grupo acabó con todos los hilos ocupados: faltan llegadas por contar.
+            Random r = (Random) L.rng
+            double tasa = (double) L.tasa
+            long fin = (long) L.fin
+            double x = (double) L.siguiente + (-Math.log(1d - r.nextDouble()) / tasa) * 1000d
+            while (x &lt; fin) {
+                L.descartadas = (long) L.descartadas + 1L
+                x = x + (-Math.log(1d - r.nextDouble()) / tasa) * 1000d
+            }
+            L.cerrada = true
+        }
+        long empezadas = (long) L.empezadas
+        long descartadas = (long) L.descartadas
+        double ventanaS = ((long) L.ventana) / 1000d
+        double tasaH = ((double) L.tasa) * 3600d
+        linea = String.format(Locale.ROOT,
+            'MORFEO: %s: %d llegadas en la ventana de %.0f s (media prevista %.1f); %d sesiones empezadas, %.1f por hora (pedidas %.1f); %d con más de 1 s de retraso, retraso medio %.2f s, máximo %.1f s; %d sin empezar por falta de hilos libres',
+            L.grupo, empezadas + descartadas, ventanaS, tasaH * ventanaS / 3600d, empezadas, empezadas * 3600d / ventanaS, tasaH,
+            (long) L.tarde, empezadas &gt; 0 ? ((double) L.retraso) / empezadas / 1000d : 0d, ((double) L.retrasoMax) / 1000d, descartadas)
+    }
+    log.info(linea)
+    OUT.println(linea)
+    props.remove(k)
+}
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree />
+        </hashTree>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

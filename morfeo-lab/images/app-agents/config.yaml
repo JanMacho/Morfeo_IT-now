@@ -1,0 +1,27 @@
+# JVM metrics (heap, GC, threads, classes, CPU) are always exported by the agent.
+# On top of them, only the few MBeans that show where an application saturates:
+#   * OperatingSystem      -> process CPU as seen by the JVM
+#   * Tomcat ThreadPool    -> web queue (Spring Boot with server.tomcat.mbeanregistry.enabled=true)
+#   * Jetty / HikariCP     -> picked up automatically if the app registers them
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+includeObjectNames:
+  - "java.lang:type=OperatingSystem"
+  - "Tomcat:type=ThreadPool,*"
+  - "com.zaxxer.hikari:type=Pool (*"
+  - "org.eclipse.jetty.util.thread:type=queuedthreadpool,*"
+rules:
+  - pattern: 'java.lang<type=OperatingSystem><>(ProcessCpuLoad|SystemCpuLoad|CpuLoad|OpenFileDescriptorCount)'
+    name: os_$1
+    type: GAUGE
+  - pattern: 'Tomcat<type=ThreadPool, name="?([^",]+)"?><>([cC]urrentThreadsBusy|[cC]urrentThreadCount|[mM]axThreads|[cC]onnectionCount|[mM]axConnections)'
+    name: tomcat_threadpool_$2
+    labels: { connector: "$1" }
+    type: GAUGE
+  - pattern: 'com.zaxxer.hikari<type=Pool \(([^)]+)\)><>(ActiveConnections|IdleConnections|TotalConnections|ThreadsAwaitingConnection)'
+    name: hikari_$2
+    labels: { pool: "$1" }
+    type: GAUGE
+  - pattern: 'org.eclipse.jetty.util.thread<type=queuedthreadpool, id=(\d+)><>(busyThreads|threads|maxThreads|queueSize)'
+    name: jetty_threadpool_$2
+    type: GAUGE

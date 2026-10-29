@@ -1,0 +1,87 @@
+# =============================================================================
+# MORFEO lab · configuration
+# -----------------------------------------------------------------------------
+# Where and how the tests run. Test plans (.jmx) and application files
+# (targets/*.yaml) never need to know anything about this file.
+# Another file:  morfeo-lab --config other.yaml ...  (or the MORFEO_LAB_CONFIG variable)
+# Every option has a default: delete what you do not need. A misspelt option
+# (for example `provder:`) is reported instead of being ignored.
+# =============================================================================
+
+cluster:
+  # kind     : the lab creates and owns a multi-node kind cluster (the usual choice on a laptop)
+  # existing : any cluster kubectl can reach (Docker Desktop Kubernetes, minikube, k3s, a real cluster)
+  provider: kind
+  name: morfeo
+  # context: my-cluster         # kubectl context (default: kind-<name>, or the current one)
+  # kind node image. Pinned so that every machine runs the same Kubernetes version.
+  node_image: kindest/node:v1.31.2
+  # Node pools: the application and the generators never share a node, so a generator never takes
+  # CPU away from the application. kind creates the nodes; with `existing`, label yours
+  # (`up` explains how) or set pools: false on a single-node cluster.
+  pools: true
+  nodes:
+    app: 1
+    generators: 1
+  # How locally built images reach the cluster: auto | kind | docker | minikube | k3s | registry
+  image_loader: auto
+  # registry: localhost:5001    # with image_loader: registry
+  # Ports on localhost (published by kind; with other clusters use `dashboard`)
+  ports:
+    grafana: 3000      # live view and history
+    prometheus: 9090
+    app: 7070          # direct access to the application
+
+namespaces:
+  app: morfeo-app
+  generators: morfeo-generators
+  monitoring: morfeo-monitoring
+
+generators:
+  # JMeter plugins installed in the generator image (ids of the JMeter Plugins Manager, versions and
+  # checksums are pinned in images/generator/plugins.json). A plan that needs another plugin is
+  # refused with the exact line to add here; `up` rebuilds the image when this list changes.
+  jmeter_plugins: [jpgc-casutg, jpgc-tst, jpgc-functions, jpgc-dummy]
+  # Resources of EACH generator. For more load, use more generators (--generators, default auto).
+  cpu: "2"
+  memory: 2Gi
+  jvm_heap: 1g
+  # --generators auto: the most that a single generator is asked to produce
+  max_threads_per_generator: 1000
+  max_rps_per_generator: 2500
+  max_generators: 8
+  # Safety limit: no scenario may run longer than this.
+  max_duration: 2h
+  # Seconds to wait for every generator to be ready (they start together).
+  start_timeout: 300
+
+monitoring:
+  enabled: true
+  grafana: true
+  # grafana_url: http://grafana.mycompany:3000   # used in result links (default http://localhost:<ports.grafana>)
+  prometheus_image: prom/prometheus:v2.54.1
+  grafana_image: grafana/grafana:11.2.2
+  # PostgreSQL metrics (connections, transactions, locks) for applications with a database.
+  # Runs in its own pod: if its image cannot be pulled, the application and the database are not affected.
+  postgres_exporter: true
+  postgres_exporter_image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
+  scrape_interval: 5s
+  # Run history in Grafana: Prometheus keeps its data in a volume for this long
+  persistent: true
+  retention: 30d
+  retention_size: 8GB
+  storage: 10Gi
+  # Flame graph of every scenario (async-profiler inside the application pod, read-only for the application)
+  profiling:
+    enabled: true
+    event: cpu          # cpu | wall | alloc | lock
+    interval: 20ms
+    chunk: 10s
+
+# A scenario that gets worse than a previous run (--baseline) by more than this fails
+regression:
+  latency_pct: 15
+  error_rate_pp: 0.5
+
+results:
+  dir: results

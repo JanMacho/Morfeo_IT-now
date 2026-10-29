@@ -1,0 +1,3 @@
+{"ts_end":"2026-10-01T09:25:30.120000Z","method":"GET","path":"/api/saldo/user_002","status":200,"latency_ms":1.250,"client_id":"user_002","session_id":"4ce89f0ec4024fdb9d390429d50db6a6"}
+{"ts_end":"2026-10-01T09:25:34.548091Z","method":"POST","path":"/api/retirada","status":400,"latency_ms":0.734,"client_id":"user_002","session_id":"4ce89f0ec4024fdb9d390429d50db6a6"}
+{"ts_end":"2026-10-01T09:25:40.000000Z","method":"GET","path":"/api/saldo/a\"b|c","status":404,"latency_ms":0.500,"client_id":"UNKNOWN","session_id":"0f1e2d3c4b5a69788796a5b4c3d2e1f0"}

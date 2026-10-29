@@ -1,0 +1,61 @@
+# One indexed Job per scenario. `parallelism` is the number of generators: they start together, and the lab
+# divides the load of the plan between them so that any number of generators produces the same total load.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ job_name }}"
+  namespace: "{{ ns.generators }}"
+  labels:
+    app.kubernetes.io/name: morfeo-generator
+    morfeo.io/run: "{{ run_id }}"
+    morfeo.io/scenario: "{{ scenario_slug }}"
+spec:
+  completionMode: Indexed
+  completions: {{ generators }}
+  parallelism: {{ generators }}
+  backoffLimit: 0
+  activeDeadlineSeconds: {{ deadline }}
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: morfeo-generator
+        morfeo.io/run: "{{ run_id }}"
+        morfeo.io/scenario: "{{ scenario_slug }}"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9270"
+    spec:
+      restartPolicy: Never
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+{%- if node_selector %}
+      nodeSelector: {{ node_selector | tojson }}
+{%- endif %}
+      # Never on the same node as another generator of this scenario if there is room elsewhere
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: { morfeo.io/run: "{{ run_id }}", morfeo.io/scenario: "{{ scenario_slug }}" }
+      containers:
+        - name: generator
+          image: {{ image }}
+          imagePullPolicy: IfNotPresent
+          ports: [ { name: metrics, containerPort: 9270 } ]
+          env:
+            - { name: MORFEO_RUN_ID, value: "{{ run_id }}" }
+            - { name: MORFEO_SCENARIO, value: "{{ scenario_slug }}" }
+            - { name: MORFEO_GENERATORS, value: "{{ generators }}" }
+            - { name: MORFEO_START_TIMEOUT, value: "{{ start_timeout }}" }
+            # time left to the orchestrator to copy the results and build the JMeter dashboard
+            - { name: MORFEO_COLLECT_TIMEOUT, value: "3600" }
+            - { name: MORFEO_REPORT_HEAP, value: "-Xms256m -Xmx{{ jvm_heap }}" }
+            # the heap of JMeter (the jmeter launcher reads HEAP)
+            - { name: HEAP, value: "-Xms{{ jvm_heap }} -Xmx{{ jvm_heap }}" }
+          resources:
+            requests: { cpu: "{{ cpu }}", memory: "{{ memory }}" }
+            limits:   { cpu: "{{ cpu }}", memory: "{{ memory }}" }
+          volumeMounts: [ { name: work, mountPath: /work } ]
+      volumes: [ { name: work, emptyDir: {} } ]

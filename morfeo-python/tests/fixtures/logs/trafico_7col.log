@@ -1,0 +1,5 @@
+2026-10-01T09:25:30.120000Z | GET | /api/saldo/user_002 | 200 | 1.250 | user_002 | 4ce89f0ec4024fdb9d390429d50db6a6
+2026-10-01T09:25:34.548091Z | POST | /api/retirada | 400 | 0.734 | user_002 | 4ce89f0ec4024fdb9d390429d50db6a6
+2026-10-01T09:25:40.000500Z | GET | /api/saldo/user_002 | 200 | 0.910 | user_002 | 4ce89f0ec4024fdb9d390429d50db6a6
+2026-10-01T09:26:01.300000Z | POST | /api/ingreso | 200 | 2.105 | user_001 | 9a0b1c2d3e4f5061728394a5b6c7d8e9
+2026-10-01T09:26:02.000000Z | GET | /wp-login.php | 404 | 0.120 | UNKNOWN | 0f1e2d3c4b5a69788796a5b4c3d2e1f0

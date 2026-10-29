@@ -1,0 +1,2 @@
+{"ts": 1790589600000, "http": {"method": "GET", "path": "/api/saldo/user_001", "status": 200}, "dur_s": 0.02, "user": "user_001"}
+{"ts": 1790589605000, "http": {"method": "POST", "path": "/api/retirada", "status": 400}, "dur_s": 0.005, "user": "user_001"}

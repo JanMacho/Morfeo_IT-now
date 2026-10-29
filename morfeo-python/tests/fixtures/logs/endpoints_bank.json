@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "context_path": "",
+  "endpoints": [
+    {"id": "GET /api/saldo/{id}", "method": "GET", "path": "/api/saldo/{id}", "path_regex": "^/api/saldo/[^/]+$"},
+    {"id": "GET /api/saldo/total", "method": "GET", "path": "/api/saldo/total", "path_regex": "^/api/saldo/total$"},
+    {"id": "POST /api/ingreso", "method": "POST", "path": "/api/ingreso", "path_regex": "^/api/ingreso$"},
+    {"id": "POST /api/retirada", "method": "POST", "path": "/api/retirada", "path_regex": "^/api/retirada$"},
+    {"id": "POST /api/usuario/crear", "method": "POST", "path": "/api/usuario/crear", "path_regex": "^/api/usuario/crear$"},
+    {"id": "ANY /api/ping", "method": "ANY", "path": "/api/ping", "path_regex": "^/api/ping$"}
+  ]
+}

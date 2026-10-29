@@ -1,0 +1,8 @@
+2026-09-28T15:10:25.242960900Z | GET | /api/saldo/user_001 | 200 | 53 | user_001
+2026-09-28T15:10:38.792938Z | POST | /api/ingreso | 200 | 111 | user_001
+2026-09-28T15:10:52.673380200Z | POST | /api/retirada | 200 | 0 | user_001
+2026-09-28T15:11:02.100000Z | GET | /api/saldo/user_002?detalle=1 | 200 | 12 | user_002
+2026-09-28T15:11:03.000000500Z | POST | /api/retirada | 400 | 3 | user_002
+2026-09-28T15:11:04.500000Z | GET | /api/v1/saldo/user_003 | 404 | 1 | UNKNOWN
+
+línea que no sigue el formato

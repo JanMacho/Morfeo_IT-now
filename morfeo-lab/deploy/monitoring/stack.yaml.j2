@@ -1,0 +1,297 @@
+# Monitoring for the lab: Prometheus (metrics store) and Grafana (live view and history).
+# Lean on purpose: two Deployments, no operators, no Helm; it fits on a laptop.
+# ---------------------------------------------------------------- Prometheus RBAC
+apiVersion: v1
+kind: ServiceAccount
+metadata: { name: prometheus, namespace: {{ ns.monitoring }} }
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata: { name: morfeo-prometheus }
+rules:
+  - apiGroups: [""]
+    resources: [nodes, nodes/metrics, nodes/proxy, pods, services, endpoints]
+    verbs: [get, list, watch]
+  - nonResourceURLs: [/metrics, /metrics/cadvisor]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata: { name: morfeo-prometheus }
+roleRef: { apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: morfeo-prometheus }
+subjects: [ { kind: ServiceAccount, name: prometheus, namespace: {{ ns.monitoring }} } ]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: prometheus-config, namespace: {{ ns.monitoring }} }
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: {{ mon.scrape_interval }}
+      evaluation_interval: {{ mon.scrape_interval }}
+    rule_files: [/etc/prometheus/alerts.yml]
+    scrape_configs:
+      # The load generators (live JMeter metrics) and the application under test (JVM metrics).
+      - job_name: morfeo-pods
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces: { names: [ {{ ns.app }}, {{ ns.generators }} ] }
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: "true"
+          - source_labels: [__meta_kubernetes_pod_phase]
+            action: drop
+            regex: (Succeeded|Failed)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_label_morfeo_io_target]
+            target_label: target
+      # Container CPU, memory and throttling from every kubelet (cAdvisor).
+      - job_name: cadvisor
+        scheme: https
+        metrics_path: /metrics/cadvisor
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        tls_config: { insecure_skip_verify: true }
+        kubernetes_sd_configs: [ { role: node } ]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_node_label_morfeo_io_pool]
+            target_label: pool
+        metric_relabel_configs:
+          - source_labels: [namespace]
+            action: keep
+            regex: ({{ ns.app }}|{{ ns.generators }})
+          - source_labels: [__name__]
+            action: keep
+            regex: container_(cpu_usage_seconds_total|memory_working_set_bytes|cpu_cfs_throttled_periods_total|cpu_cfs_periods_total|network_receive_bytes_total|network_transmit_bytes_total|spec_cpu_quota|spec_memory_limit_bytes|oom_events_total)
+  # Alerts: listed on the Prometheus "Alerts" page and drawn on the Grafana timeline.
+  # There is no Alertmanager: they inform, they do not notify anyone.
+  alerts.yml: |
+    groups:
+      - name: morfeo
+        rules:
+          - alert: MorfeoLatencyAboveSLO
+            expr: |
+              histogram_quantile(0.95, sum by (le, run, scenario) (rate(morfeo_response_time_seconds_bucket{stage="main"}[1m])))
+                > on (run, scenario) max by (run, scenario) (morfeo_slo_latency_seconds{quantile="0.95"})
+            for: 30s
+            labels: { severity: warning }
+            annotations:
+              summary: p95 latency above the SLO
+              description: {% raw %}"Run {{ $labels.run }}, scenario {{ $labels.scenario }}: p95 {{ $value | humanizeDuration }}"{% endraw %}
+          - alert: MorfeoServerErrorsAboveSLO
+            expr: |
+              sum by (run, scenario) (rate(morfeo_requests_total{stage="main",result=~"server_5xx|network|assertion"}[1m]))
+                / clamp_min(sum by (run, scenario) (rate(morfeo_requests_total{stage="main"}[1m])), 1e-9)
+                > on (run, scenario) max by (run, scenario) (morfeo_slo_error_ratio)
+            for: 30s
+            labels: { severity: critical }
+            annotations:
+              summary: Server error rate above the SLO
+              description: {% raw %}"Run {{ $labels.run }}, scenario {{ $labels.scenario }}: {{ $value | humanizePercentage }} server errors"{% endraw %}
+          - alert: MorfeoAppNotResponding
+            expr: up{namespace="{{ ns.app }}", target!=""} == 0
+            for: 30s
+            labels: { severity: critical }
+            annotations:
+              summary: An application replica is not answering metric scrapes
+              description: {% raw %}"Pod {{ $labels.pod }}"{% endraw %}
+          - alert: MorfeoAppOOMKilled
+            expr: increase(container_oom_events_total{namespace="{{ ns.app }}", container="app"}[2m]) > 0
+            labels: { severity: critical }
+            annotations:
+              summary: The application exceeded its memory limit (OOMKilled)
+              description: {% raw %}"Pod {{ $labels.pod }}"{% endraw %}
+          - alert: MorfeoAppCPUThrottled
+            expr: |
+              sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{namespace="{{ ns.app }}", container="app"}[1m]))
+                / clamp_min(sum by (pod) (rate(container_cpu_cfs_periods_total{namespace="{{ ns.app }}", container="app"}[1m])), 1e-9)
+                > 0.25
+            for: 1m
+            labels: { severity: warning }
+            annotations:
+              summary: The application is limited by its CPU quota
+              description: {% raw %}"Pod {{ $labels.pod }}: {{ $value | humanizePercentage }} of CPU periods throttled"{% endraw %}
+          - alert: MorfeoWebThreadsExhausted
+            expr: |
+              sum by (pod) (tomcat_threadpool_currentthreadsbusy{target!=""})
+                / clamp_min(sum by (pod) (tomcat_threadpool_maxthreads{target!=""}), 1) >= 0.95
+            for: 30s
+            labels: { severity: warning }
+            annotations:
+              summary: Web thread pool exhausted
+              description: {% raw %}"Pod {{ $labels.pod }}"{% endraw %}
+          - alert: MorfeoDBPoolWaiting
+            expr: sum by (pod) (hikari_threadsawaitingconnection{target!=""}) > 0
+            for: 30s
+            labels: { severity: warning }
+            annotations:
+              summary: Requests are waiting for a database connection
+              description: {% raw %}"Pod {{ $labels.pod }}: {{ $value }} threads waiting"{% endraw %}
+          - alert: MorfeoGeneratorSaturated
+            expr: |
+              sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="{{ ns.generators }}", container="generator"}[1m]))
+                / on (pod) (sum by (pod) (container_spec_cpu_quota{namespace="{{ ns.generators }}", container="generator"}) / 100000)
+                > 0.9
+            for: 1m
+            labels: { severity: warning }
+            annotations:
+              summary: A load generator is CPU-saturated; its figures understate the application
+              description: {% raw %}"Pod {{ $labels.pod }}"{% endraw %}
+{%- if persistent %}
+---
+# Keeps the history of every run (live metrics of the generators and of the server) across Prometheus restarts, so
+# Grafana can show any past run. Deleted with `morfeo-lab down --destroy`.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: { name: prometheus-data, namespace: {{ ns.monitoring }} }
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: { requests: { storage: {{ mon.storage }} } }
+{%- endif %}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: prometheus, namespace: {{ ns.monitoring }} }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }   # one writer for the TSDB volume
+  selector: { matchLabels: { app: prometheus } }
+  template:
+    metadata:
+      labels: { app: prometheus }
+      annotations: { morfeo.io/config-hash: "{{ config_hash }}" }   # restart when the config or rules change
+    spec:
+      serviceAccountName: prometheus
+{%- if persistent %}
+      # Volumes from some provisioners are root-owned: let Prometheus (uid 65534) write its TSDB
+      initContainers:
+        - name: fix-permissions
+          image: {{ mon.prometheus_image }}
+          imagePullPolicy: IfNotPresent
+          securityContext: { runAsUser: 0 }
+          command: ["sh", "-c", "chown -R 65534:65534 /prometheus"]
+          volumeMounts: [ { name: data, mountPath: /prometheus } ]
+{%- endif %}
+{%- if pools %}
+      nodeSelector: { morfeo.io/pool: system }
+      tolerations: [ { key: node-role.kubernetes.io/control-plane, operator: Exists, effect: NoSchedule } ]
+{%- endif %}
+      containers:
+        - name: prometheus
+          image: {{ mon.prometheus_image }}
+          imagePullPolicy: IfNotPresent
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --storage.tsdb.retention.time={{ mon.retention }}
+            - --storage.tsdb.retention.size={{ mon.retention_size }}
+            - --web.enable-lifecycle
+            - --web.page-title=MORFEO · Prometheus
+          ports: [ { containerPort: 9090 } ]
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits:   { cpu: "1", memory: 1Gi }
+          readinessProbe: { httpGet: { path: /-/ready, port: 9090 }, periodSeconds: 5 }
+          volumeMounts:
+            - { name: config, mountPath: /etc/prometheus }
+            - { name: data, mountPath: /prometheus }
+      volumes:
+        - { name: config, configMap: { name: prometheus-config } }
+{%- if persistent %}
+        - { name: data, persistentVolumeClaim: { claimName: prometheus-data } }
+{%- else %}
+        - { name: data, emptyDir: {} }
+{%- endif %}
+---
+apiVersion: v1
+kind: Service
+metadata: { name: prometheus, namespace: {{ ns.monitoring }} }
+spec:
+  type: NodePort
+  selector: { app: prometheus }
+  ports: [ { port: 9090, targetPort: 9090, nodePort: 30090 } ]
+# ---------------------------------------------------------------- Grafana
+{%- if mon.grafana %}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: grafana-provisioning, namespace: {{ ns.monitoring }} }
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        uid: morfeo-prom
+        type: prometheus
+        access: proxy
+        url: http://prometheus.{{ ns.monitoring }}.svc:9090
+        isDefault: true
+        jsonData: { timeInterval: {{ mon.scrape_interval }} }
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: morfeo
+        folder: MORFEO
+        type: file
+        allowUiUpdates: true
+        options: { path: /var/lib/grafana/dashboards }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: grafana, namespace: {{ ns.monitoring }} }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: grafana } }
+  template:
+    metadata:
+      labels: { app: grafana }
+      annotations: { morfeo.io/dashboards-hash: "{{ dashboards_hash }}" }
+    spec:
+{%- if pools %}
+      nodeSelector: { morfeo.io/pool: system }
+      tolerations: [ { key: node-role.kubernetes.io/control-plane, operator: Exists, effect: NoSchedule } ]
+{%- endif %}
+      containers:
+        - name: grafana
+          image: {{ mon.grafana_image }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - { name: GF_AUTH_ANONYMOUS_ENABLED, value: "true" }
+            - { name: GF_AUTH_ANONYMOUS_ORG_ROLE, value: Admin }
+            - { name: GF_AUTH_DISABLE_LOGIN_FORM, value: "true" }
+            - { name: GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH, value: /var/lib/grafana/dashboards/load-tests.json }
+            - { name: GF_ANALYTICS_REPORTING_ENABLED, value: "false" }
+            - { name: GF_ANALYTICS_CHECK_FOR_UPDATES, value: "false" }
+            - { name: GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES, value: "false" }
+            - { name: GF_NEWS_NEWS_FEED_ENABLED, value: "false" }
+            - { name: GF_USERS_DEFAULT_LANGUAGE, value: "en-US" }
+            - { name: GF_DASHBOARDS_MIN_REFRESH_INTERVAL, value: "5s" }
+          ports: [ { containerPort: 3000 } ]
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits:   { cpu: 500m, memory: 512Mi }
+          readinessProbe: { httpGet: { path: /api/health, port: 3000 }, periodSeconds: 5 }
+          volumeMounts:
+            - { name: provisioning, mountPath: /etc/grafana/provisioning/datasources/datasources.yaml, subPath: datasources.yaml }
+            - { name: provisioning, mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml, subPath: dashboards.yaml }
+            - { name: dashboards, mountPath: /var/lib/grafana/dashboards }
+      volumes:
+        - { name: provisioning, configMap: { name: grafana-provisioning } }
+        - { name: dashboards, configMap: { name: grafana-dashboards } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: grafana, namespace: {{ ns.monitoring }} }
+spec:
+  type: NodePort
+  selector: { app: grafana }
+  ports: [ { port: 3000, targetPort: 3000, nodePort: 30300 } ]
+{%- endif %}

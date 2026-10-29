@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+# Linux and macOS launcher: ./morfeo-lab <command>   (works from any directory)
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+PY="$(command -v python3 || command -v python)"
+PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}"
+MORFEO_LAUNCHER=wrapper
+export PYTHONPATH MORFEO_LAUNCHER
+exec "$PY" -m morfeo_lab "$@"

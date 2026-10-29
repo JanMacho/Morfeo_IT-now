@@ -1,0 +1,48 @@
+{
+  "jmeter": {
+    "version": "5.6.3",
+    "url": "https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz"
+  },
+  "common": [
+    {"coordinates": "kg.apc:jmeter-plugins-cmn-jmeter:0.7", "sha256": "98124a4ea7c68f099835a00d91ce84b3d0e537d88dd4ca63ba8af704193bf3e6"}
+  ],
+  "plugins": {
+    "jpgc-casutg": {
+      "description": "Concurrency, Arrivals, Free-Form Arrivals, Ultimate and Stepping thread groups",
+      "artifacts": [
+        {"coordinates": "kg.apc:jmeter-plugins-casutg:2.10", "sha256": "49f8f78d24c6c217b2ba233bc18920d9fc7006d8709b84c8a609795295e702dd"}
+      ],
+      "classes": [
+        "com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroup",
+        "com.blazemeter.jmeter.threads.arrivals.ArrivalsThreadGroup",
+        "com.blazemeter.jmeter.threads.arrivals.FreeFormArrivalsThreadGroup",
+        "com.blazemeter.jmeter.control.VirtualUserController",
+        "kg.apc.jmeter.threads.UltimateThreadGroup",
+        "kg.apc.jmeter.threads.SteppingThreadGroup"
+      ]
+    },
+    "jpgc-tst": {
+      "description": "Throughput Shaping Timer",
+      "artifacts": [
+        {"coordinates": "kg.apc:jmeter-plugins-tst:2.6", "sha256": "7ddcf371020fb7a4edaf9ed1f2a85a33ded8d388852fab859dfe99db89b13c1c"}
+      ],
+      "classes": ["kg.apc.jmeter.timers.VariableThroughputTimer"]
+    },
+    "jpgc-functions": {
+      "description": "Extra functions such as __MD5, __caseFormat, __chooseRandom, __strReplace, __substring",
+      "artifacts": [
+        {"coordinates": "kg.apc:jmeter-plugins-functions:2.2", "sha256": "f6da27aa2f170bf55e550e110a3ff878bec31161c60fc3028215ce704174f3d8"}
+      ],
+      "classes": [],
+      "functions": ["MD5", "caseFormat", "chooseRandom", "doubleSum", "iterationNum", "lowercase", "uppercase",
+                    "strLen", "strReplace", "substring", "isDefined"]
+    },
+    "jpgc-dummy": {
+      "description": "Dummy Sampler",
+      "artifacts": [
+        {"coordinates": "kg.apc:jmeter-plugins-dummy:0.4", "sha256": "a0e75fe56cd571a5ac35a7691962104d296907858046e0f1dfff5c679f05fa8b"}
+      ],
+      "classes": ["kg.apc.jmeter.samplers.DummySampler"]
+    }
+  }
+}

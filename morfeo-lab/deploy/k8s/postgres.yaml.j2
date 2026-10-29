@@ -1,0 +1,93 @@
+# PostgreSQL dependency of the app under test (target.dependencies.postgres).
+# Lives on the app node pool: it is part of the system being measured.
+# Data is ephemeral (emptyDir): every lab starts clean, and the target's
+# reset_sql brings it to a known state before every scenario.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: {{ ns.app }}
+  labels: { app.kubernetes.io/name: postgres }
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector: { matchLabels: { app.kubernetes.io/name: postgres } }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: postgres }
+    spec:
+{%- if node_selector %}
+      nodeSelector: {{ node_selector | tojson }}
+{%- endif %}
+      enableServiceLinks: false
+      containers:
+        - name: postgres
+          image: {{ pg.image }}
+          imagePullPolicy: IfNotPresent
+{%- if pg.args %}
+          args: {{ pg.args | tojson }}
+{%- endif %}
+          env:
+            - { name: POSTGRES_DB, value: {{ pg.database | tojson }} }
+            - { name: POSTGRES_USER, value: {{ pg.user | tojson }} }
+            - { name: POSTGRES_PASSWORD, value: {{ pg.password | tojson }} }
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          ports: [ { name: pg, containerPort: 5432 } ]
+          resources: {{ pg.resources | tojson }}
+          readinessProbe:
+            exec: { command: [ "sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\"" ] }
+            periodSeconds: 3
+            failureThreshold: 20
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+            - { name: shm, mountPath: /dev/shm }
+      volumes:
+        - { name: data, emptyDir: {} }
+        - { name: shm, emptyDir: { medium: Memory, sizeLimit: 256Mi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: {{ ns.app }}
+spec:
+  selector: { app.kubernetes.io/name: postgres }
+  ports: [ { name: pg, port: {{ pg.port }}, targetPort: pg } ]
+{%- if exporter_image %}
+---
+# Database metrics for Grafana (connections by state, transactions, locks, cache hits).
+# Its own Deployment, NOT a sidecar: if this image cannot be pulled, PostgreSQL and the app
+# still start (the panels just stay empty). Tiny, on the system pool: it never competes with
+# the app or the database for CPU.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-exporter
+  namespace: {{ ns.app }}
+  labels: { app.kubernetes.io/name: postgres-exporter }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app.kubernetes.io/name: postgres-exporter } }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: postgres-exporter }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9187"
+    spec:
+{%- if system_selector %}
+      nodeSelector: {{ system_selector | tojson }}
+      tolerations: [ { key: node-role.kubernetes.io/control-plane, operator: Exists, effect: NoSchedule } ]
+{%- endif %}
+      enableServiceLinks: false
+      containers:
+        - name: exporter
+          image: {{ exporter_image }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - { name: DATA_SOURCE_URI, value: "postgres.{{ ns.app }}.svc.cluster.local:{{ pg.port }}/{{ pg.database }}?sslmode=disable" }
+            - { name: DATA_SOURCE_USER, value: {{ pg.user | tojson }} }
+            - { name: DATA_SOURCE_PASS, value: {{ pg.password | tojson }} }
+          ports: [ { name: metrics, containerPort: 9187 } ]
+          resources: { requests: { cpu: 10m, memory: 32Mi }, limits: { cpu: 200m, memory: 128Mi } }
+{%- endif %}

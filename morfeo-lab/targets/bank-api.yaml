@@ -1,0 +1,88 @@
+# =============================================================================
+# Application: bank-api-stress (Spring Boot 3, Java 21, PostgreSQL 16)
+# -----------------------------------------------------------------------------
+# One file per application. It is ALL the lab needs to run a Java application:
+# no Dockerfile and no Kubernetes YAML. See docs/TARGETS.md for every option.
+#
+# The JAR is looked up in this order (the first candidate that exists wins):
+#   1. $BANK_API_JAR                        (variable with the path of the JAR)
+#   2. apps/bank-api-stress*.jar            (JAR copied into the apps/ folder of the lab)
+#   3. ../backend-java/target/bank-api-stress.jar
+# or once:  morfeo-lab deploy bank-api --jar C:\path\bank-api-stress.jar
+# =============================================================================
+
+name: bank-api
+description: Bank API (Spring Boot 3, Java 21, PostgreSQL 16)
+
+artifact:
+  jar:                       # candidates (wildcards allowed); each one must match a single file
+    - ${BANK_API_JAR}
+    - apps/bank-api-stress*.jar
+    - ../backend-java/target/bank-api-stress.jar
+  java_version: 21
+
+runtime:
+  port: 7070
+  replicas: 1
+  java_opts: "-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
+  # The two queues of the application
+  env:
+    MAX_THREADS: "200"        # Tomcat threads (web queue)
+    ACCEPT_COUNT: "100"
+    DB_POOL_SIZE: "10"        # HikariCP pool (database queue): 503 when it is full
+    DB_TIMEOUT_MS: "5000"
+    # Observability only (no code change): publishes the HikariCP pool MBeans so that the lab can
+    # chart active connections and threads waiting for a connection.
+    SPRING_DATASOURCE_HIKARI_REGISTER_MBEANS: "true"
+  # Keep FIXED across runs that are compared with each other: this is "the machine".
+  resources:
+    requests: { cpu: "1", memory: 768Mi }
+    limits:   { cpu: "1", memory: 768Mi }
+
+health:
+  type: http
+  path: /actuator/health/readiness         # needs the database (no traffic until it is up)
+  liveness_path: /actuator/health/liveness # never depends on the database
+  startup_timeout: 180
+
+# The application writes its traffic log to the path given in TRAFFIC_LOG (one JSON object per request).
+# The lab collects the file from EVERY replica after each scenario.
+logs:
+  env: TRAFFIC_LOG
+  files:
+    - /logs/trafico.json
+
+dependencies:
+  postgres:
+    image: postgres:16
+    database: banco
+    user: banco
+    password: banco            # lab-only credentials, not a secret
+    # How the application receives the connection ({host}, {port}, {database}, {user}, {password})
+    env:
+      DB_URL: "jdbc:postgresql://{host}:{port}/{database}"
+      DB_USER: "{user}"
+      DB_PASSWORD: "{password}"
+    # Runs before EVERY scenario: every test starts with the same data.
+    reset_sql:
+      - ${BANK_API_RESET_SQL}
+      - apps/reset.sql
+      - ../backend-java/db/reset.sql
+    resources:
+      requests: { cpu: 500m, memory: 512Mi }
+      limits:   { cpu: "1", memory: 1Gi }
+
+metrics:
+  jmx: true                # JVM, Tomcat and HikariCP metrics in Grafana (JMX agent)
+
+# --- Acceptance criteria of every scenario ----------------------------------------
+slo:
+  p95_ms: 300
+  p99_ms: 1000
+  # % of requests that fail BECAUSE OF THE SERVER: 5xx (including 503), timeouts, connection
+  # errors and failed assertions. 4xx responses are client behaviour (for example 400 for
+  # insufficient funds) and are reported separately, not counted here.
+  error_rate_pct: 1.0
+  endpoints:
+    /api/saldo/{id}:
+      p95_ms: 150

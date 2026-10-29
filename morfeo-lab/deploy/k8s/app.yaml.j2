@@ -1,0 +1,161 @@
+# The application under test, rendered by `morfeo-lab deploy` from targets/<name>.yaml.
+# Generic for any JVM application: the image is built from its JAR (images/app-runtime) or supplied ready-made.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: {{ ns.app }}
+  labels: { app.kubernetes.io/name: app, morfeo.io/target: "{{ t.name }}" }
+spec:
+  replicas: {{ t.runtime.replicas }}
+  selector:
+    matchLabels: { app.kubernetes.io/name: app }
+  strategy: { type: Recreate }   # never two versions alive during a test
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: app, morfeo.io/target: "{{ t.name }}" }
+      annotations:
+        morfeo.io/image: "{{ image }}"
+        morfeo.io/config-hash: "{{ config_hash }}"
+{%- if jmx %}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9404"
+{%- endif %}
+    spec:
+{%- if node_selector %}
+      nodeSelector: {{ node_selector | tojson }}
+{%- endif %}
+{%- if t.runtime.replicas > 1 %}
+      # Spread replicas over the application nodes when there are several (horizontal scaling tests)
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector: { matchLabels: { app.kubernetes.io/name: app } }
+{%- endif %}
+      terminationGracePeriodSeconds: 20
+      enableServiceLinks: false
+{%- if jmx or profiling %}
+      initContainers:
+        - name: morfeo-agents
+          image: {{ agents_image }}
+          imagePullPolicy: IfNotPresent
+          resources: { requests: { cpu: 10m, memory: 16Mi }, limits: { cpu: 100m, memory: 32Mi } }
+          volumeMounts: [ { name: morfeo-agent, mountPath: /morfeo-agent } ]
+{%- endif %}
+      containers:
+        - name: app
+          image: {{ image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http, containerPort: {{ t.runtime.port }} }
+{%- if jmx %}
+            - { name: jvm-metrics, containerPort: 9404 }
+{%- endif %}
+          env:
+            - { name: JAVA_OPTS, value: {{ t.runtime.java_opts | tojson }} }
+{%- if java_tool_options %}
+            - { name: JAVA_TOOL_OPTIONS, value: {{ java_tool_options | tojson }} }
+{%- endif %}
+{%- if t.runtime.args %}
+            - { name: APP_ARGS, value: {{ t.runtime.args | tojson }} }
+{%- endif %}
+            - { name: MORFEO_POD, valueFrom: { fieldRef: { fieldPath: metadata.name } } }
+{%- for k, v in env.items() %}
+            - { name: {{ k }}, value: {{ v | string | tojson }} }
+{%- endfor %}
+          resources: {{ t.runtime.resources | tojson }}
+          startupProbe:
+{%- if t.health.type == 'http' %}
+            httpGet: { path: {{ t.health.path | tojson }}, port: {{ t.runtime.port }}, scheme: {{ t.runtime.scheme | upper }} }
+{%- else %}
+            tcpSocket: { port: {{ t.runtime.port }} }
+{%- endif %}
+            periodSeconds: 2
+            failureThreshold: {{ [(t.health.startup_timeout // 2) | int, 1] | max }}
+          readinessProbe:
+{%- if t.health.type == 'http' %}
+            httpGet: { path: {{ t.health.path | tojson }}, port: {{ t.runtime.port }}, scheme: {{ t.runtime.scheme | upper }} }
+{%- else %}
+            tcpSocket: { port: {{ t.runtime.port }} }
+{%- endif %}
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Liveness is deliberately lenient: under stress a slow app must be
+          # MEASURED, not killed by Kubernetes (that would hide the real limit).
+          livenessProbe:
+{%- if t.health.liveness_path %}
+            httpGet: { path: {{ t.health.liveness_path | tojson }}, port: {{ t.runtime.port }}, scheme: {{ t.runtime.scheme | upper }} }
+{%- else %}
+            tcpSocket: { port: {{ t.runtime.port }} }
+{%- endif %}
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 6
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+{%- if jmx or profiling %}
+            - { name: morfeo-agent, mountPath: /morfeo-agent, readOnly: true }
+{%- endif %}
+{%- if profiling %}
+            - { name: morfeo-profile, mountPath: /morfeo-profile }
+{%- endif %}
+{%- if logs_dir %}
+            - { name: app-logs, mountPath: {{ logs_dir }} }
+{%- endif %}
+{%- if tools %}
+        # Lab helper: lets the orchestrator read the app's traffic log and profiles even when the app
+        # image has no shell (distroless). Tiny, idle, outside the app's CPU/memory limits. Profile
+        # chunks older than 6 hours are removed (the lab keeps the ones of each scenario).
+        - name: morfeo-tools
+          image: {{ agents_image }}
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "trap 'exit 0' TERM; while true; do find /morfeo-profile -name '*.collapsed' -mmin +360 -delete 2>/dev/null; sleep 600 & wait $!; done"]
+          resources: { requests: { cpu: 5m, memory: 8Mi }, limits: { cpu: 100m, memory: 64Mi } }
+          volumeMounts:
+{%- if logs_dir %}
+            - { name: app-logs, mountPath: {{ logs_dir }}, readOnly: true }
+{%- endif %}
+{%- if profiling %}
+            - { name: morfeo-profile, mountPath: /morfeo-profile }
+{%- endif %}
+{%- endif %}
+      volumes:
+        - { name: tmp, emptyDir: {} }
+{%- if jmx or profiling %}
+        - { name: morfeo-agent, emptyDir: {} }
+{%- endif %}
+{%- if profiling %}
+        - { name: morfeo-profile, emptyDir: { sizeLimit: 512Mi } }
+{%- endif %}
+{%- if logs_dir %}
+        - { name: app-logs, emptyDir: {} }
+{%- endif %}
+---
+# The stable in-cluster address the load generators use.
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  namespace: {{ ns.app }}
+  labels: { app.kubernetes.io/name: app }
+spec:
+  type: ClusterIP
+  selector: { app.kubernetes.io/name: app }
+  ports:
+    - { name: http, port: {{ t.runtime.port }}, targetPort: http }
+{%- if nodeport %}
+---
+# Access from this machine: http://localhost:<cluster.ports.app> (kind maps the NodePort)
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-nodeport
+  namespace: {{ ns.app }}
+spec:
+  type: NodePort
+  selector: { app.kubernetes.io/name: app }
+  ports:
+    - { name: http, port: {{ t.runtime.port }}, targetPort: http, nodePort: 30070 }
+{%- endif %}

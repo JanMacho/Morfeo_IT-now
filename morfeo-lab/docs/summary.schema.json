@@ -1,0 +1,296 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MORFEO lab · summary.json (schema version 1)",
+  "description": "Everything the lab learned about one scenario. schema_version changes only when a key is renamed, removed or changes meaning; adding keys does not change it, so readers must ignore keys they do not know. Rates are fractions of the requests (0 to 1), times are milliseconds, moments are ISO 8601 in UTC.",
+  "type": "object",
+  "required": ["schema_version", "producer", "lab_version", "run_id", "started_at", "interrupted", "verdict", "scenario", "application", "slo", "generators", "overall", "steady", "setup", "teardown", "endpoints", "errors", "capacity", "checks", "diagnosis", "server"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "producer": {"const": "morfeo-lab"},
+    "lab_version": {"type": "string"},
+    "run_id": {"type": "string"},
+    "started_at": {"type": "string"},
+    "wall_clock_s": {"type": "number"},
+    "interrupted": {"type": "boolean", "description": "The run was stopped with Ctrl+C: the figures cover what ran until then."},
+    "verdict": {"enum": ["PASS", "PASS_WITH_WARNINGS", "FAIL"]},
+    "scenario": {"$ref": "#/$defs/scenario"},
+    "application": {
+      "type": "object",
+      "required": ["name", "replicas"],
+      "properties": {
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "replicas": {"type": "integer"},
+        "resources": {"type": "object"},
+        "env": {"type": "object", "description": "Variables of the application; private values are masked."},
+        "image": {"type": ["string", "null"]}
+      }
+    },
+    "slo": {
+      "type": "object",
+      "properties": {
+        "p95_ms": {"type": ["number", "null"]},
+        "p99_ms": {"type": ["number", "null"]},
+        "error_rate_pct": {"type": ["number", "null"]},
+        "min_throughput_rps": {"type": ["number", "null"]},
+        "endpoints": {"type": "object"}
+      }
+    },
+    "generators": {
+      "type": "object",
+      "required": ["count", "exit_codes", "distribution"],
+      "properties": {
+        "count": {"type": "integer", "minimum": 1},
+        "why": {"type": "string"},
+        "exit_codes": {"type": "array", "items": {"type": "integer"}},
+        "distribution": {"$ref": "#/$defs/distribution"}
+      }
+    },
+    "links": {"type": "object"},
+    "pods": {
+      "type": "object",
+      "required": ["replicas", "restarts_during_run"],
+      "properties": {
+        "replicas": {"type": "integer"},
+        "restarts_during_run": {"type": "integer", "minimum": 0},
+        "last_termination_reason": {"type": ["string", "null"]}
+      }
+    },
+    "baseline": {"type": ["object", "null"]},
+    "overall": {"$ref": "#/$defs/window"},
+    "steady": {"$ref": "#/$defs/window"},
+    "steady_window_s": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+    "setup": {"$ref": "#/$defs/stage"},
+    "teardown": {"$ref": "#/$defs/stage"},
+    "endpoints": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/window"},
+          {
+            "type": "object",
+            "required": ["key", "label", "method", "path", "share"],
+            "properties": {
+              "key": {"type": "string", "description": "'GET /api/saldo/{id}': the same key as endpoints.json and profile.json."},
+              "label": {"type": "string"},
+              "method": {"type": "string"},
+              "path": {"type": "string"},
+              "share": {"type": "number"},
+              "status_codes": {"type": "object", "additionalProperties": {"type": "integer"}},
+              "slo_p95_ms": {"type": ["number", "null"]}
+            }
+          }
+        ]
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["class", "label", "code", "count"],
+        "properties": {
+          "class": {"enum": ["client_4xx", "server_5xx", "network", "assertion"]},
+          "label": {"type": "string"},
+          "code": {"type": "string"},
+          "message": {"type": "string"},
+          "count": {"type": "integer"},
+          "first_at_s": {"type": "number"}
+        }
+      }
+    },
+    "capacity": {
+      "type": "object",
+      "required": ["available"],
+      "properties": {
+        "available": {"type": "boolean"},
+        "reason": {"type": "string"},
+        "basis": {"enum": ["thread_group", "over_time"]},
+        "unit": {"type": "string"},
+        "levels": {"type": "array", "items": {"$ref": "#/$defs/level"}},
+        "sustainable": {"oneOf": [{"$ref": "#/$defs/level"}, {"type": "null"}]},
+        "breaking": {"oneOf": [{"$ref": "#/$defs/level"}, {"type": "null"}]},
+        "peak_goodput": {"oneOf": [{"$ref": "#/$defs/level"}, {"type": "null"}]},
+        "saturation_knee": {"oneOf": [{"$ref": "#/$defs/level"}, {"type": "null"}]},
+        "requests_per_arrival": {"type": ["number", "null"]}
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "status", "target", "actual"],
+        "properties": {
+          "name": {"type": "string"},
+          "status": {"enum": ["pass", "warn", "fail"]},
+          "target": {"type": "string"},
+          "actual": {"type": "string"},
+          "detail": {"type": "string"}
+        }
+      }
+    },
+    "diagnosis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "code", "title", "detail"],
+        "properties": {
+          "severity": {"enum": ["critical", "serious", "warning", "info", "good"]},
+          "code": {
+            "enum": ["crash", "app_unreachable", "setup_failed", "http_503", "http_5xx", "no_answer", "cpu_throttled", "cpu_high", "web_threads", "db_waiting", "db_cpu", "db_connections", "gc", "heap", "target_missed", "open_limit", "generator_cpu", "generator_memory", "knee", "log_incomplete", "queue_outside", "profile_hotspot", "no_signal"]
+          },
+          "title": {"type": "string"},
+          "detail": {"type": "string"},
+          "params": {"type": "object"}
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "description": "Peaks of the server metrics during the load. null when Prometheus was not available.",
+      "additionalProperties": {"type": ["number", "null"]}
+    },
+    "traffic_log": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["available"],
+          "properties": {
+            "available": {"type": "boolean"},
+            "lines": {"type": "integer"},
+            "unmatched_lines": {"type": "integer"},
+            "client_answered": {"type": "integer"},
+            "logged": {"type": "integer"},
+            "completeness": {"type": ["number", "null"]},
+            "endpoints": {"type": "array", "items": {"type": "object"}},
+            "file": {"type": "string"}
+          }
+        }
+      ]
+    },
+    "profile": {"type": ["object", "null"]},
+    "timeline": {"type": ["object", "null"]},
+    "series": {"type": "object"},
+    "percentile_curve": {"type": "object"},
+    "noise_windows": {"type": ["object", "null"]}
+  },
+  "$defs": {
+    "distribution": {
+      "type": "object",
+      "required": ["mode", "reasons"],
+      "properties": {
+        "mode": {"enum": ["split", "single", "plan"]},
+        "reasons": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "required": ["name", "file", "model", "thread_groups", "endpoints"],
+      "properties": {
+        "name": {"type": "string"},
+        "file": {"type": "string"},
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "model": {"enum": ["closed", "open", "throughput", "mixed"]},
+        "planned_duration_s": {"type": ["number", "null"]},
+        "ramp_up_s": {"type": ["number", "null"]},
+        "peak_users": {"type": ["number", "null"]},
+        "target_rps": {"type": ["number", "null"]},
+        "target_arrivals_per_s": {"type": ["number", "null"]},
+        "thread_groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "role"],
+            "properties": {
+              "name": {"type": "string"},
+              "type": {"type": "string"},
+              "role": {"enum": ["setup", "main", "teardown"]},
+              "model": {"type": "string"},
+              "threads": {"type": ["number", "null"]},
+              "peak": {"type": ["number", "null"]},
+              "peak_rps": {"type": ["number", "null"]},
+              "start_s": {"type": ["number", "null"]},
+              "duration_s": {"type": ["number", "null"]},
+              "iterations": {"type": ["integer", "null"]},
+              "scripted_pacing": {"type": "boolean"}
+            }
+          }
+        },
+        "distribution": {"$ref": "#/$defs/distribution"},
+        "endpoints": {"type": "array", "items": {"type": "string"}},
+        "transactions": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "latency": {
+      "type": "object",
+      "properties": {
+        "mean": {"type": ["number", "null"]},
+        "min": {"type": ["number", "null"]},
+        "max": {"type": ["number", "null"]},
+        "p50": {"type": ["number", "null"]},
+        "p90": {"type": ["number", "null"]},
+        "p95": {"type": ["number", "null"]},
+        "p99": {"type": ["number", "null"]},
+        "p99_9": {"type": ["number", "null"]}
+      }
+    },
+    "by_class": {
+      "type": "object",
+      "description": "ok, client_4xx (client behaviour), server_5xx, network and assertion; failures are the last three.",
+      "properties": {
+        "ok": {"type": "integer"},
+        "client_4xx": {"type": "integer"},
+        "server_5xx": {"type": "integer"},
+        "network": {"type": "integer"},
+        "assertion": {"type": "integer"}
+      }
+    },
+    "window": {
+      "type": "object",
+      "required": ["requests", "throughput_rps", "goodput_rps", "failed_requests", "error_rate", "server_error_rate", "latency_ms"],
+      "properties": {
+        "requests": {"type": "integer"},
+        "duration_s": {"type": "number"},
+        "throughput_rps": {"type": "number"},
+        "goodput_rps": {"type": "number"},
+        "failed_requests": {"type": "integer"},
+        "error_rate": {"type": "number", "minimum": 0, "maximum": 1, "description": "Share of 4xx answers (client behaviour)."},
+        "server_error_rate": {"type": "number", "minimum": 0, "maximum": 1, "description": "Share of 5xx answers, network errors and failed assertions."},
+        "by_class": {"$ref": "#/$defs/by_class"},
+        "latency_ms": {"$ref": "#/$defs/latency"},
+        "status_codes": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "max_users": {"type": ["number", "null"]}
+      }
+    },
+    "stage": {
+      "type": "object",
+      "required": ["requests", "failed_requests"],
+      "properties": {
+        "requests": {"type": "integer"},
+        "failed_requests": {"type": "integer"},
+        "duration_s": {"type": "number"},
+        "by_class": {"$ref": "#/$defs/by_class"}
+      }
+    },
+    "level": {
+      "type": "object",
+      "required": ["load", "label", "p95_ms", "server_error_rate", "throughput_rps", "goodput_rps"],
+      "properties": {
+        "load": {"type": "number"},
+        "label": {"type": "string"},
+        "requests": {"type": "integer"},
+        "seconds": {"type": "number"},
+        "throughput_rps": {"type": "number"},
+        "goodput_rps": {"type": "number"},
+        "p50_ms": {"type": ["number", "null"]},
+        "p95_ms": {"type": ["number", "null"]},
+        "p99_ms": {"type": ["number", "null"]},
+        "server_error_rate": {"type": "number"},
+        "within_slo": {"type": "boolean"},
+        "requested_rps": {"type": "number"},
+        "scaling_efficiency": {"type": "number"}
+      }
+    }
+  }
+}

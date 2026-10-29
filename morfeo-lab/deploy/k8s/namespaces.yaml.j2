@@ -1,0 +1,8 @@
+{%- for role, name in ns.items() %}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "{{ name }}"
+  labels: { morfeo.io/role: "{{ role }}" }
+---
+{%- endfor %}

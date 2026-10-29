@@ -1,0 +1,25 @@
+# Written by `morfeo-lab up` from config/lab.yaml: do not edit.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: {{ cluster.name }}
+nodes:
+  - role: control-plane
+    image: {{ cluster.node_image }}
+    labels:
+      morfeo.io/pool: system
+    extraPortMappings:
+      - { containerPort: 30300, hostPort: {{ cluster.ports.grafana }}, protocol: TCP }
+      - { containerPort: 30090, hostPort: {{ cluster.ports.prometheus }}, protocol: TCP }
+      - { containerPort: 30070, hostPort: {{ cluster.ports.app }}, protocol: TCP }
+{%- for i in range(cluster.nodes.app) %}
+  - role: worker
+    image: {{ cluster.node_image }}
+    labels:
+      morfeo.io/pool: app
+{%- endfor %}
+{%- for i in range(cluster.nodes.generators) %}
+  - role: worker
+    image: {{ cluster.node_image }}
+    labels:
+      morfeo.io/pool: generators
+{%- endfor %}

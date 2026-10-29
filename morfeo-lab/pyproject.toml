@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "morfeo-lab"
+version = "1.0.0"
+description = "MORFEO lab: runs JMeter test plans against Java applications on Kubernetes and measures them"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0,<7",
+    "jinja2>=3.1,<4",
+    "pandas>=2.1,<4",
+    "numpy>=1.26,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6",
+    "jsonschema>=4.20",
+]
+
+# The command is `morfeo-lab` (not `morfeo`): the AI team's package already installs `morfeo`.
+# Templates, images and configuration are read from the lab folder, so install in editable mode:
+#     pip install -e .
+[project.scripts]
+morfeo-lab = "morfeo_lab.__main__:main"
+
+[tool.setuptools]
+packages = { find = { include = ["morfeo_lab*"] } }
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["E501", "B905", "SIM108", "RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
